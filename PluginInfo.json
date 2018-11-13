@@ -1,0 +1,7 @@
+{
+  "FullName":"Extended Event Log",
+  "Description":"Extended Event Log",
+  "Version":1.0,
+  "MinApiVersion":2.7,
+  "Dependencies": [ ]
+}
