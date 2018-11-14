@@ -54,6 +54,15 @@
     <ClCompile Include="M_inventory_and_harvest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="M_console_helper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CHElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ConsoleHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EventMessage.h">
@@ -90,6 +99,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="M_inventory_and_harvest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="M_console_helper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CHElement.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsoleHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Lock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

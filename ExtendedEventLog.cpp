@@ -12,6 +12,7 @@
 #include "Utils.h"
 
 #include "M_config_reader.h"
+#include "M_console_helper.h"
 #include "M_event_writer.h"
 #include "M_hook_helper.h"
 
@@ -207,6 +208,8 @@ ModuleHeader modulesList[] = {
 	{ "ConfigReader", M_config_reader_init, M_config_reader_done },
 	{ "EventWriter", M_event_writer_init, M_event_writer_done },
 	{ "HookHelper", M_hook_helper_init, M_hook_helper_done },
+
+	{ "ConsoleHelper", M_console_helper_init, M_console_helper_done },
 
 	// timer subsystem
 

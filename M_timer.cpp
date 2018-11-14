@@ -19,8 +19,8 @@ void addTimer(TimerCallback tcb) {
 	timerList.push_back(tcb);
 }
 
-HANDLE con = 0;
-int ccolumns = 0, crows = 0;
+// HANDLE con = 0;
+// int ccolumns = 0, crows = 0;
 
 
 /*
@@ -135,35 +135,6 @@ void *timerIterators[] = {
 };
 */
 
-DECLARE_HOOK(UWorld_InitWorld, void, UWorld*, DWORD64);
-void Hook_UWorld_InitWorld(UWorld *w, DWORD64 p) {
-	UWorld_InitWorld_original(w, p);
-	con = GetStdHandle(STD_OUTPUT_HANDLE);
-
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	GetConsoleScreenBufferInfo(con, &csbi);
-	auto columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-	auto rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-	// ccolumns = columns;
-	// crows = rows;
-
-	COORD topLeft = { 0, 0 };
-	DWORD written;
-	// CONSOLE_SCREEN_BUFFER_INFO screen;
-	// GetConsoleScreenBufferInfo(con, &screen);
-	FillConsoleOutputCharacterA(
-		con, ' ', columns * rows, topLeft, &written
-	);
-
-	CONSOLE_CURSOR_INFO     cursorInfo;
-
-	GetConsoleCursorInfo(con, &cursorInfo);
-	cursorInfo.bVisible = false;
-	SetConsoleCursorInfo(con, &cursorInfo);
-
-	SetConsoleOutputCP(CP_UTF8);
-}
-
 
 void __Timer() {
 	const auto now = cur_time = std::chrono::system_clock::now();
@@ -255,6 +226,7 @@ void __Timer() {
 		eventWriter->push(m);
 		*/
 
+		/*
 		if (con) {
 
 			CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -313,15 +285,14 @@ void __Timer() {
 			// WriteConsole(con, buf, strlen(buf), &dwBytesWritten, NULL);
 			printf("%s", buf);
 		}
+		*/
 	}
 }
 
 
 bool M_timer_init() {
 
-	__register_hook(UWorld, InitWorld);
-
-	con = GetStdHandle(STD_OUTPUT_HANDLE);
+	// con = GetStdHandle(STD_OUTPUT_HANDLE);
 
 	timerList = TimerList();
 	firstTime = true;
@@ -335,12 +306,10 @@ bool M_timer_init() {
 	}
 
 	ArkApi::GetCommands().AddOnTimerCallback("__Timer", &__Timer);
-
 	return true;
 }
 
 bool M_timer_done() {
 	ArkApi::GetCommands().RemoveOnTimerCallback("__Timer");
-	__unregister_hook(UWorld, InitWorld);
 	return true;
 }
