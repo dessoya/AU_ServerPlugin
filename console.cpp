@@ -4,366 +4,123 @@
 #include <vector>
 #include "windows.h"
 
-/*
-	if (classId_mutex == 0) {
-		classId_mutex = CreateMutex(NULL, FALSE, NULL);
-	}
-
-	auto dwWaitResult = WaitForSingleObject(classId_mutex, INFINITE);
-	if (WAIT_OBJECT_0 != dwWaitResult) {
-		OutputDebugStringA("RegisterClassId WaitForSingleObject problem\n");
-	}
-
-	classIdIterator++;
-	auto id = classIdIterator;
-
-	ReleaseMutex(classId_mutex);
-
-*/
-
-class ConsoleHelper;
-ConsoleHelper *curcon = 0;
-
-class CHElement {
-	int ox, oy;
-	int x, y, w, h;
-	HANDLE mutex;
-public:
-
-	bool waling;
-	bool stickRight;
-	int color;
-	CHElement(int x_, int y_, int w_, int h_) : x(x_), ox(x_), oy(y_), y(y_), w(w_), h(h_) {
-		mutex = CreateMutex(NULL, FALSE, NULL);
-		waling = false;
-		stickRight = false;
-		color = 7;
-	}
-
-	void lock() {
-		auto dwWaitResult = WaitForSingleObject(mutex, INFINITE);
-		if (WAIT_OBJECT_0 != dwWaitResult) {
-			// OutputDebugStringA("RegisterClassId WaitForSingleObject problem\n");
-		}
-	}
-
-	void unlock() {
-		ReleaseMutex(mutex);
-	}
-
-	int getX() { return x; }
-	int getY() { return y; }
-	int getH() { return h; }
-	int getW() { return w; }
-	virtual std::string getLine(int idx) { return ""; }
-	virtual void onResize(int cw, int ch) {
-		if (stickRight) {
-			x = cw - w - ox;
-		}
-	}
-	bool isArea(int hx, int hy) {
-		if (hx >= x && hx < x + w && hy >= y && hy < y + h) {
-			return true;
-		}
-		return false;
-	}
-	void update();
-	virtual void lostFocus() { }
-	virtual void setFocus() { }
-
-	virtual void onWHeeled(int dir) {}
-};
-
-class CHTitle : public CHElement {
-	std::string title;
-	int ocolor;
-public:
-	CHTitle(int x_, int y_, std::string title_, int w_) : CHElement(x_, y_, w_, 1), title(title_) {
-
-	}
-
-	virtual std::string getLine(int idx) {
-		if (idx == 0) return title;
-		return "";
-	}
-
-	void setTitle(std::string title_) { title = title_; }
-
-	virtual void lostFocus() {
-		color = ocolor;
-		update();
-	}
-	virtual void setFocus() {
-		ocolor = color;
-		color = 8;
-		update();
-	}
-
-	virtual void onWHeeled(int dir) {
-		if (dir > 0) {
-			color++;
-		}
-		else {
-			color--;
-		}
-		update();
-	}
-};
-
-char sp[] = "                                                                                                                                                                                                                                                                                                                                       ";
-class ConsoleHelper {
-
-	HANDLE _stdout, _stdin;
-	int w, h;
-
-
-public:
-	std::vector<CHElement *> elements;
-
-	void addElement(CHElement *element) {
-		elements.push_back(element);
-		element->onResize(w, h);
-		drawElement(element);
-	}
-
-	void drawElement(CHElement *element) {
-		SetConsoleTextAttribute(_stdout, element->color);
-		auto x = element->getX();
-		for (auto i = element->getY(), idx = 0, s = i + element->getH(); i < s; i++, idx++) {
-			setPos(x, i);
-			outWithSpaces(element->getLine(idx), element->getW(), element->waling);
-		}
-		SetConsoleTextAttribute(_stdout, 7);
-	}
-
-	void outWithSpaces(std::string s, int w, bool waling) {
-		
-		char *ss = (char *)s.c_str();
-		int len = 0;
-		while (*ss) len += (*ss++ & 0xc0) != 0x80;
-
-		if (waling) {
-			if (len < w) {
-				auto needs = w - len;
-				std::cout << &sp[sizeof(sp) - needs];
-			}
-			std::cout << s.c_str();
-		}
-		else {
-			std::cout << s.c_str();
-			if (len < w) {
-				auto needs = w - len;
-				std::cout << &sp[sizeof(sp) - needs];
-			}
-		}
-	}
-
-	ConsoleHelper() {
-
-/*
-		if (SetConsoleCtrlHandler(_HandlerRoutine, true) == 0) {
-		}
-	*/
-
-		_stdout = GetStdHandle(STD_OUTPUT_HANDLE);
-		_stdin = GetStdHandle(STD_INPUT_HANDLE);
-
-		DWORD fdwMode = ENABLE_EXTENDED_FLAGS;
-		if (!SetConsoleMode(_stdin, fdwMode)) {}
-		fdwMode = ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT;
-		if (!SetConsoleMode(_stdin, fdwMode)) {}
-
-		clear();
-	}
-
-	void processInpitEvents() {
-
-		DWORD lpcNumberOfEvents, lpNumberOfEventsRead;
-		INPUT_RECORD record;
-
-		GetNumberOfConsoleInputEvents(_stdin, &lpcNumberOfEvents);
-		while (lpcNumberOfEvents) {
-			ReadConsoleInput(_stdin, &record, 1, &lpNumberOfEventsRead);
-			
-			switch (record.EventType) {
-			case WINDOW_BUFFER_SIZE_EVENT:
-			{
-				clear();
-				onClear();
-			}
-			break;
-			case MOUSE_EVENT:
-			{
-				auto me = record.Event.MouseEvent;
-				onMouse(me);
-			}
-			break;
-			case KEY_EVENT:
-			{
-				auto ke = record.Event.KeyEvent;
-				onKey(ke);
-			}
-			break;
-			}
-
-			GetNumberOfConsoleInputEvents(_stdin, &lpcNumberOfEvents);
-		}
-	}
-
-	virtual void onClear() {}
-	virtual void onKey(KEY_EVENT_RECORD ke) {}
-	virtual void onMouse(MOUSE_EVENT_RECORD me) {}
-
-	void clear() {
-
-		CONSOLE_SCREEN_BUFFER_INFO csbi;
-		GetConsoleScreenBufferInfo(_stdout, &csbi);
-		auto columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-		auto rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-		w = columns;
-		h = rows;
-
-		COORD topLeft = { 0, 0 };
-		DWORD written;
-		SetConsoleTextAttribute(_stdout, 7);
-		FillConsoleOutputCharacterA(
-			_stdout, ' ', columns * rows, topLeft, &written
-		);
-
-		CONSOLE_CURSOR_INFO     cursorInfo;
-		GetConsoleCursorInfo(_stdout, &cursorInfo);
-		cursorInfo.bVisible = false;
-		SetConsoleCursorInfo(_stdout, &cursorInfo);
-
-		SetConsoleOutputCP(CP_UTF8);
-
-		COORD NewSBSize;
-		NewSBSize.X = columns;
-		NewSBSize.Y = rows;
-		SetConsoleScreenBufferSize(_stdout, NewSBSize);
-
-		FlushConsoleInputBuffer(_stdout);
-
-		auto it = elements.begin();
-		while (it != elements.end()) {
-			auto e = *it;
-			e->onResize(w, h);
-			drawElement(e);
-			it++;
-		}
-		FlushConsoleInputBuffer(_stdout);
-		setPos(w - 1, h - 1);
-	}
-
-	// ctrl + c
-	static BOOL WINAPI _HandlerRoutine(DWORD dwCtrlType) {
-		return true;
-	}
-
-	void setPos(int x, int y) {
-		COORD pos = { (short)x, (short)y };
-		SetConsoleCursorPosition(_stdout, pos);
-	}
-};
-void CHElement::update() {
-	 if (curcon) {
-		 curcon->drawElement(this);
-	}
-}
+#include "ConsoleHelper.h"
 
 class MyCH : public ConsoleHelper {
-
-	CHTitle *keytitle, *mousetitle;
-	CHElement *curhovered;
 
 public:
 
 	MyCH() : ConsoleHelper() {
 
-		curhovered = 0;
-
-		keytitle = new CHTitle(0, 0, "", 36);
+		auto keytitle = new CHTitle("keytitle", 0, 0, "", 40, true);
 		keytitle->waling = true;
-		keytitle->stickRight = true;
 		addElement(keytitle);
 
-		mousetitle = new CHTitle(0, 1, "", 26);
+		auto mousetitle = new CHTitle("mousetitle", 0, 1, "", 40, true);
 		mousetitle->waling = true;
-		mousetitle->stickRight = true;
 		addElement(mousetitle);
+
 	}
+
 	virtual void onKey(KEY_EVENT_RECORD ke) {
-		
-		char buf[60];
+
+		char buf[130];
 		sprintf_s(buf, "кнопка %d %s state %d", ke.wVirtualKeyCode, (ke.bKeyDown ? "нажата" : "отжата"), ke.dwControlKeyState);
-		keytitle->setTitle(buf);
-		drawElement(keytitle);
-
-
-		if (ke.wVirtualKeyCode == 67 && ke.dwControlKeyState & 8) {
-			exit(1);
+		auto keytitle = (CHTitle*)ConsoleHelper::_getElement("keytitle");
+		if (keytitle) {
+			keytitle->setTitle(buf);
+			drawElement(keytitle);
 		}
+
+		ConsoleHelper::onKey(ke);
 	}
 
 	virtual void onMouse(MOUSE_EVENT_RECORD me) {
-		
-		/*
-		me.dwEventFlags == MOUSE_WHEELED
-		tt > 0 or < 0 = direction
-		*/
 
-		char buf[30];
+		char buf[130];
 		short *w = (short *)&me.dwButtonState;
-		int tt = w[1];
-		sprintf_s(buf, "x %d y %d f %d s %d", me.dwMousePosition.X, me.dwMousePosition.Y, me.dwEventFlags, tt);
-		mousetitle->setTitle(buf);
-		drawElement(mousetitle);
-
-		auto it = elements.begin();
-		CHElement *finded = 0;
-		while (it != elements.end()) {
-			auto e = *it;
-			if (e->isArea(me.dwMousePosition.X, me.dwMousePosition.Y)) {
-				finded = e;
-				break;
-			}
-			it++;
+		int dir = w[1];
+		sprintf_s(buf, "x %d y %d b %d f %d s %d", me.dwMousePosition.X, me.dwMousePosition.Y, w[0], me.dwEventFlags, dir);
+		auto mousetitle = (CHTitle*)ConsoleHelper::_getElement("mousetitle");
+		if (mousetitle) {
+			mousetitle->setTitle(buf);
+			drawElement(mousetitle);
 		}
 
-		if (finded != curhovered) {
+		ConsoleHelper::onMouse(me);
+	}
+};
 
-			if (curhovered) {
-				curhovered->lostFocus();
-			}
-			curhovered = finded;
-			if (curhovered) {
-				curhovered->setFocus();
-			}
+class CtrlC : public CHElement {
+public:
+	volatile bool exitFlag;
+	CtrlC() : CHElement("ctrlc", false), exitFlag(false) {
+
+	}
+
+	virtual bool onKey(KEY_EVENT_RECORD ke) {
+		if (ke.wVirtualKeyCode == 67 && ke.dwControlKeyState & 8) {
+			exitFlag = true;
 		}
-
-		if (me.dwEventFlags == MOUSE_WHEELED) {
-			if (curhovered) {
-				curhovered->onWHeeled(tt);
-			}
-		}
-
-		/*
-		search element
-		*/
+		return false;
 	}
 };
 
 
-int main() {
-	auto ch = curcon = new MyCH();
-	auto title = new CHTitle(5, 5, "test title", 15);
-	title->color = 2;
-	ch->addElement(title);
+class CHMenu {
+public:
+	std::string name;
+	std::vector<std::string> items;
+	int x, y, w;
 
-	while (true) {
-		Sleep(10);
-		ch->processInpitEvents();
+	CHMenu(std::string name_, int x_, int y_, int w_) : name(name_), x(x_), y(y_), w(w_) {
+
 	}
+
+	void addMenu(std::string title) {
+		auto o = items.size();
+		auto id = name + ":item:" + std::to_string(o);
+		auto t = new CHTitle(id, x, y + (int)o, title, w, false);
+		items.push_back(id);
+		t->add();
+	}
+};
+
+int main() {
+
+	new MyCH();
+
+	auto ctrlC = new CtrlC();
+	ctrlC->add();
+
+	auto box = new BoxWithVScroll("log1", 1, 3, -50, -80, true);
+
+	auto title = new CHTitle("server", 0, 0, "ArkUpgrade server: hh-island", 50);
+	title->add();
+
+	title = new CHTitle("menu1 name", 4, 2, "Control", 20);
+	title->color = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+	title->add();
+
+	title = new CHTitle("menu2 name", 4, 12, "Section actions", 20);
+	title->color = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+	title->add();
+
+	auto menu = new CHMenu("menu1", 6, 4, 20);
+	menu->addMenu("Inventory hooks");
+	menu->addMenu("Players activity");
+	menu->addMenu("line3");
+
+	while (!ctrlC->exitFlag) {
+		Sleep(300);	
+		char b[100];
+		sprintf_s(b, "%d", rand());		
+		box->pushLine(b);
+	}
+
+	auto c = ConsoleHelper::instance;
+	ConsoleHelper::instance = 0;
+	delete c;
 
 	return 0;
 }
