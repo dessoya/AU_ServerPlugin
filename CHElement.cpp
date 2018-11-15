@@ -1,6 +1,7 @@
+#include "pch.h"
 #include "CHElement.h"
 #include "ConsoleHelper.h"
-#include <API/ARK/Ark.h>
+//#include <API/ARK/Ark.h>
 
 
 CHElement::CHElement(std::string name_, bool isRender_) : name(name_), isRender(isRender_) {
@@ -125,10 +126,7 @@ VScroll::VScroll(std::string name_, int x_, int y_, int h_, bool stickRight_, in
 	sstart = 0;
 }
 
-void VScroll::changePos(int npos) {
-	if (npos < 0) npos = 0;
-	if (npos > total - visible) npos = total - visible;
-	if (npos == pos) return;
+void VScroll::forceSetPos(int npos) {
 	lock();
 	pos = npos;
 	unlock();
@@ -137,6 +135,13 @@ void VScroll::changePos(int npos) {
 	if (onChangeReceiver) {
 		onChangeReceiver->onVScrollChange(pos);
 	}
+}
+
+void VScroll::changePos(int npos) {
+	if (npos < 0) npos = 0;
+	if (npos > total - visible) npos = total - visible;
+	if (npos == pos) return;
+	forceSetPos(npos);
 }
 
 void VScroll::onResize(int cw, int ch) {
@@ -159,6 +164,7 @@ void VScroll::updateRegions() {
 	double t = (double)h - 2.0;
 
 	ssize = (int)ceil(t / ((double)total / (double)visible));
+	if (ssize < 1) ssize = 1;
 
 	sstart = (int)ceil(t / ((double)total / (double)pos));
 	if (sstart < 0) sstart = 0;
@@ -205,21 +211,37 @@ std::string VScroll::getLine(int idx, bool *nc) {
 CHBoxVScroll::CHBoxVScroll(std::string name_, int x_, int y_, int w_, int h_, bool stickRight_, VScroll *vscroll_)
 	: CHBox(name_, x_, y_, w_, h_, stickRight_), vscroll(vscroll_) {
 	pos = 0;
+	linesHolder = 0;
 	vscroll->total = 1;
 	vscroll->pos = 0;
 	vscroll->updateRegions();
 }
 
-void CHBoxVScroll::pushLine(std::string line) {
+void CHBoxVScroll::setupLinesHolder(LinesHolder *lh) {
+	
+	if (linesHolder) linesHolder->receiver = 0;
+	linesHolder = lh;
+	if (linesHolder) linesHolder->receiver = this;
 
-	lock();
-	lines.push_back(line);
-	unlock();
+	pos = 0;
+	int total = linesHolder ? (int)linesHolder->lines.size() : 1;
+	
+	vscroll->lock();
+	vscroll->total = total;
+	vscroll->unlock();
+
+	vscroll->forceSetPos(0);
+	vscroll->update();
+
+	update();
+}
+
+void CHBoxVScroll::onPushLine() {
 
 	bool lastPos = vscroll->total == vscroll->visible + vscroll->pos;
 
 	vscroll->lock();
-	vscroll->total = (int)lines.size();
+	vscroll->total = (int)linesHolder->lines.size();
 	vscroll->unlock();
 
 	if (lastPos) {
@@ -230,10 +252,20 @@ void CHBoxVScroll::pushLine(std::string line) {
 	}
 	vscroll->update();
 
-	if (lines.size() > pos && lines.size() < vscroll->visible + vscroll->pos) {
+	if (linesHolder->lines.size() > pos && linesHolder->lines.size() < vscroll->visible + vscroll->pos) {
 		update();
 	}
 }
+
+void CHBoxVScroll::onClearLines() {
+	vscroll->lock();
+	vscroll->total = 1;
+	vscroll->unlock();
+	vscroll->forceSetPos(0);
+	vscroll->update();
+	update();
+}
+
 
 void CHBoxVScroll::onWHeeled(int dir) {
 	if (dir > 0) {
@@ -256,9 +288,11 @@ void CHBoxVScroll::onVScrollChange(int npos) {
 }
 
 std::string CHBoxVScroll::getLine(int idx, bool *nc) {
-	int p = idx + pos;
-	if (p >= 0 && p < lines.size()) {
-		return lines[p];
+	if (linesHolder) {
+		int p = idx + pos;
+		if (p >= 0 && p < linesHolder->lines.size()) {
+			return linesHolder->lines[p];
+		}
 	}
 	return "";
 }
@@ -270,6 +304,7 @@ std::string CHBoxVScroll::getLine(int idx, bool *nc) {
 
 CHTitle::CHTitle(std::string name_, int x_, int y_, std::string title_, int w_, bool stickRight_)
 	: CHRenderElement(name_, x_, y_, w_, 1, stickRight_), title(title_) {
+	areaClickReceiver = 0;
 }
 
 std::string CHTitle::getLine(int idx, bool *nc) {
@@ -277,7 +312,7 @@ std::string CHTitle::getLine(int idx, bool *nc) {
 	return "";
 }
 
-void CHTitle::setTitle(std::string title_) { title = title_; }
+void CHTitle::setTitle(std::string title_) { title = title_; update(); }
 
 void CHTitle::lostFocus() {
 	color = ocolor;
@@ -290,6 +325,7 @@ void CHTitle::setFocus() {
 }
 
 void CHTitle::onWHeeled(int dir) {
+	/*
 	if (dir > 0) {
 		color++;
 	}
@@ -297,13 +333,22 @@ void CHTitle::onWHeeled(int dir) {
 		color--;
 	}
 	update();
+	*/
+}
+
+void CHTitle::onMouse(MOUSE_EVENT_RECORD me) {
+	if (me.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED) {
+		if (areaClickReceiver) {
+			areaClickReceiver->onAreaClick(this);
+		}
+	}
 }
 
 
 // --------------------------------------------------------------------------------------------
 
 
-BoxWithVScroll::BoxWithVScroll(std::string name_, int x, int y, int w, int h, bool stickRight) : name(name_) {
+BoxWithVScroll::BoxWithVScroll(std::string name_, int x, int y, int w, int h, bool stickRight) : CHElement(name_) {
 
 	if (stickRight) {
 		// Log::GetLog()->info("BoxWithVScroll 1");
@@ -320,7 +365,31 @@ BoxWithVScroll::BoxWithVScroll(std::string name_, int x, int y, int w, int h, bo
 	}
 }
 
+CHBoxVScroll *BoxWithVScroll::getBox() {
+	return (CHBoxVScroll *)ConsoleHelper::_getElement(name + ":box");
+}
+
+
+/*
 void BoxWithVScroll::pushLine(std::string line) {
 	CHBoxVScroll *box = (CHBoxVScroll *)ConsoleHelper::_getElement(name + ":box");
 	if (box) box->pushLine(line);
+}
+*/
+
+
+
+LinesHolder::LinesHolder() : receiver(0) {
+
+}
+
+void LinesHolder::pushLine(std::string line) {
+	lines.push_back(line);
+	if (receiver) receiver->onPushLine();
+}
+
+void LinesHolder::clear() {
+	lines.clear();
+	if (receiver) receiver->onClearLines();
+
 }
