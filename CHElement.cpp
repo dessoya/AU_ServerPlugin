@@ -1,7 +1,6 @@
-#include "pch.h"
-
 #include "CHElement.h"
 #include "ConsoleHelper.h"
+#include <API/ARK/Ark.h>
 
 
 CHElement::CHElement(std::string name_, bool isRender_) : name(name_), isRender(isRender_) {
@@ -120,7 +119,7 @@ void CHBox::onResize(int cw, int ch) {
 
 
 VScroll::VScroll(std::string name_, int x_, int y_, int h_, bool stickRight_, int total_, int pos_, int visible_)
-	: CHBox(name, x_, y_, 1, h_, stickRight_), total(total_), pos(pos_), visible(visible_) {
+	: CHBox(name_, x_, y_, 1, h_, stickRight_), total(total_), pos(pos_), visible(visible_) {
 	onChangeReceiver = 0;
 	ssize = 1;
 	sstart = 0;
@@ -258,7 +257,7 @@ void CHBoxVScroll::onVScrollChange(int npos) {
 
 std::string CHBoxVScroll::getLine(int idx, bool *nc) {
 	int p = idx + pos;
-	if (p < lines.size()) {
+	if (p >= 0 && p < lines.size()) {
 		return lines[p];
 	}
 	return "";
@@ -307,8 +306,12 @@ void CHTitle::onWHeeled(int dir) {
 BoxWithVScroll::BoxWithVScroll(std::string name_, int x, int y, int w, int h, bool stickRight) : name(name_) {
 
 	if (stickRight) {
+		// Log::GetLog()->info("BoxWithVScroll 1");
+
 		auto vs = new VScroll(name + ":vs", x, y, h, true, 1, 0, 1);
+		// Log::GetLog()->info("BoxWithVScroll 2");
 		vs->add();
+		// Log::GetLog()->info("BoxWithVScroll 3");
 
 		auto box = new CHBoxVScroll(name + ":box", x + 1, y, w, h, true, vs);
 		// box->color = 0xf8;

@@ -3,24 +3,23 @@
 #include "ConsoleHelper.h"
 #include "M_hook_helper.h"
 #include "M_timer.h"
+#include "M_config_reader.h"
 #include "processthreadsapi.h"
 
-class MyCH : public ConsoleHelper {
+BoxWithVScroll *logBox;
 
-	CHTitle *keytitle, *mousetitle;
+class MyCH : public ConsoleHelper {
 
 public:
 
 	MyCH() : ConsoleHelper() {
 
-		keytitle = new CHTitle(0, 0, "", 40);
+		auto keytitle = new CHTitle("keytitle", 0, 0, "", 40, true);
 		keytitle->waling = true;
-		keytitle->stickRight = true;
 		addElement(keytitle);
 
-		mousetitle = new CHTitle(0, 1, "", 40);
+		auto mousetitle = new CHTitle("mousetitle", 0, 1, "", 40, true);
 		mousetitle->waling = true;
-		mousetitle->stickRight = true;
 		addElement(mousetitle);
 
 	}
@@ -29,45 +28,35 @@ public:
 
 		char buf[130];
 		sprintf_s(buf, "кнопка %d %s state %d", ke.wVirtualKeyCode, (ke.bKeyDown ? "нажата" : "отжата"), ke.dwControlKeyState);
-		// sprintf_s(buf, "key %d %s state %d", ke.wVirtualKeyCode, (ke.bKeyDown ? "pressed" : "unpressed"), ke.dwControlKeyState);
-		keytitle->setTitle(buf);
-		drawElement(keytitle);
+		auto keytitle = (CHTitle*)ConsoleHelper::_getElement("keytitle");
+		if (keytitle) {
+			keytitle->setTitle(buf);
+			drawElement(keytitle);
+		}
 
 		ConsoleHelper::onKey(ke);
-
-
-		/*
-		if (ke.wVirtualKeyCode == 67 && ke.dwControlKeyState & 8) {
-			exit(1);
-		}
-		*/
 	}
 
 	virtual void onMouse(MOUSE_EVENT_RECORD me) {
 
-		/*
-		me.dwEventFlags == MOUSE_WHEELED
-		tt > 0 or < 0 = direction
-		*/
-
-		
 		char buf[130];
 		short *w = (short *)&me.dwButtonState;
-		int tt = w[1];
-		sprintf_s(buf, "x %d y %d f %d s %d", me.dwMousePosition.X, me.dwMousePosition.Y, me.dwEventFlags, tt);
-		mousetitle->setTitle(buf);
-		drawElement(mousetitle);
-		
+		int dir = w[1];
+		sprintf_s(buf, "x %d y %d b %d f %d s %d", me.dwMousePosition.X, me.dwMousePosition.Y, w[0], me.dwEventFlags, dir);
+		auto mousetitle = (CHTitle*)ConsoleHelper::_getElement("mousetitle");
+		if (mousetitle) {
+			mousetitle->setTitle(buf);
+			drawElement(mousetitle);
+		}
 
 		ConsoleHelper::onMouse(me);
-
 	}
 };
 
 class CtrlC : public CHElement {
 public:
 	volatile bool exitFlag;
-	CtrlC() : CHElement(), exitFlag(false) {
+	CtrlC() : CHElement("ctrlc", false), exitFlag(false) {
 
 	}
 
@@ -86,6 +75,8 @@ void __Timer2() {
 	if (bFirstTime && ConsoleHelper::instance) {
 		bFirstTime = false;
 		ConsoleHelper::instance->clear();
+		auto e = ConsoleHelper::instance->getElement("loading");
+		ConsoleHelper::instance->delElement(e);
 	}
 	if (!exited && ctrlC && ctrlC->exitFlag) {
 		exited = true;
@@ -95,10 +86,11 @@ void __Timer2() {
 			Log::GetLog()->info("World saved.");
 		}
 
-		// ArkApi::GetApiUtils().GetWorld()->
+		Log::GetLog()->error("Exit");
 
-		Log::GetLog()->info("Exit."); 
-		throw std::runtime_error("Exit");
+		// ArkApi::GetApiUtils().GetWorld()->
+		// Log::GetLog()->info("Exit."); 
+		// throw std::runtime_error("Exit");
 		/*
 		FreeConsole();
 		ExitProcess(0);
@@ -118,52 +110,40 @@ void Hook_UWorld_InitWorld(UWorld *w, DWORD64 p) {
 }
 
 
-class SinChar : public CHElement {
-public:
-	std::string c;
-	__time cur_time;
-	double pos;
-public:
-	SinChar(int x_, std::string c_, int p) : CHElement(x_, 0, 1, 1), c(c_) {
-		cur_time = std::chrono::system_clock::now();
-		pos = p * 10;
-	}
-
-	virtual std::string getLine(int idx) {
-		if (idx == 0) return c;
-		return "";
-	}
-
-	virtual void onTimer() {
-		auto onu = std::chrono::system_clock::now();
-		auto workedtime = std::chrono::duration_cast<std::chrono::milliseconds>(onu - cur_time);
-		pos += workedtime.count();
-		cur_time = onu;
-		auto y_ = (sin(pos / 500.0) * (((double)ConsoleHelper::instance->h - 4.0) / 2)) + ((double)ConsoleHelper::instance->h / 2.0);
-		ConsoleHelper::instance->moveElement(this, x, (int)y_);
-	}
-};
-
-SinChar *s1 = 0;
 
 bool M_console_helper_init() {
 
 	bFirstTime = true;
 	exited = false;
+
 	new MyCH();
 	ctrlC = new CtrlC();
 	ctrlC->add();
 
-	char *s1 = "ArkUpgrade Server HH island";
-	char bb[2];
-	bb[1] = 0;
+	auto t1 = new CHTitle("title", 0, 0, std::string("ArkUpgrade server:"), 18, false);
+	t1->add();
 
-	for (int i = 0, l = strlen(s1); i < l; i++) {
-		bb[0] = s1[i];
-		auto s2 = new SinChar(10 + i*2, bb, i);
-		s2->add();
+	t1 = new CHTitle("title2", 19, 0, config->getString("serverName"), 30, false);
+	t1->color = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
+	t1->add();
+	
+	if (ArkApi::GetApiUtils().GetWorld()) {
+
+	}
+	else {
+		t1 = new CHTitle("loading", 0, 2, std::string("Loading . . "), 40, false);
+		t1->add();
 	}
 
+	logBox = new BoxWithVScroll("log1", 1, 3, -50, -80, true);
+
+	t1 = new CHTitle("menu1 name", 4, 2, "Control", 20);
+	t1->color = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+	t1->add();
+
+	t1 = new CHTitle("menu2 name", 4, 12, "Section actions", 20);
+	t1->color = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+	t1->add();
 
 
 	ArkApi::GetCommands().AddOnTimerCallback("__Timer2", &__Timer2);
@@ -177,11 +157,11 @@ bool M_console_helper_done() {
 	ArkApi::GetCommands().RemoveOnTimerCallback("__Timer2");
 	__unregister_hook(UWorld, InitWorld);
 
-	ctrlC = 0;
-
 	auto c = ConsoleHelper::instance;
 	ConsoleHelper::instance = 0;
 	delete c;
+
+	delete logBox;
 
 	return true;
 }

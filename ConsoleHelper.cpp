@@ -1,6 +1,5 @@
- #include "pch.h"
-
 #include "ConsoleHelper.h"
+#include <API/ARK/Ark.h>
 
 DWORD WINAPI ThreadFunction_ch(LPVOID lpParam);
 char sp[] = "                                                                                                                                                                                                                                                                                                                                       ";
@@ -45,6 +44,7 @@ void ConsoleHelper::delElement(CHElement *element) {
 		}
 	}
 	elementsLock.unlock();
+	clear();
 }
 
 void ConsoleHelper::addElement(CHElement *element) {
@@ -394,10 +394,8 @@ void ConsoleHelper::clear() {
 	if (h < 4) h = 4;
 	*/
 
-	COORD topLeft = { 0, 0 };
-	DWORD written;
-	SetConsoleTextAttribute(_stdout, 7);
-	FillConsoleOutputCharacterA(_stdout, ' ', w * h, topLeft, &written);
+	// COORD topLeft = { 0, 0 };
+	// DWORD written;
 
 	CONSOLE_CURSOR_INFO     cursorInfo;
 	GetConsoleCursorInfo(_stdout, &cursorInfo);
@@ -410,6 +408,13 @@ void ConsoleHelper::clear() {
 	NewSBSize.X = w;
 	NewSBSize.Y = h;
 	SetConsoleScreenBufferSize(_stdout, NewSBSize);
+
+	SetConsoleTextAttribute(_stdout, 7);
+	for (int i = 0; i < h; i++) {
+		setPos(0, i);
+		std::cout << &sp[sizeof(sp) - w - 1];
+	}
+	// FillConsoleOutputCharacterA(_stdout, ' ', w * h, topLeft, &written);
 
 	outLock.unlock();
 	// FlushConsoleInputBuffer(_stdout);
