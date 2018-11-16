@@ -51,20 +51,7 @@ public:
 	}
 };
 
-class CtrlC : public CHElement {
-public:
-	volatile bool exitFlag;
-	CtrlC() : CHElement("ctrlc", false), exitFlag(false) {
 
-	}
-
-	virtual bool onKey(KEY_EVENT_RECORD ke) {
-		if (ke.wVirtualKeyCode == 67 && ke.dwControlKeyState & 8) {
-			exitFlag = true;
-		}
-		return false;
-	}
-};
 
 
 class CHMenu : public CHElement, public AreaClickReceiver {
@@ -232,9 +219,6 @@ int main() {
 	auto ctrlC = new CtrlC();
 	ctrlC->add();
 
-	auto box = new BoxWithVScroll("log1", 1, 3, -50, -80, true);
-	box->add();
-
 	auto title = new CHTitle("server", 0, 0, "ArkUpgrade server: hh-island", 50);
 	title->add();
 
@@ -245,6 +229,9 @@ int main() {
 	title = new CHTitle("menu2 name", 4, 12, "Section actions", 20);
 	title->color = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
 	title->add();
+
+	auto box = new BoxWithVScroll("log1", 1, 3, -50, -80, true);
+	box->add();
 
 	auto menu = new CHMenu("menu1", 6, 4, 20);
 	menu->addMenu("Inventory hooks");

@@ -5,6 +5,7 @@
 #include "M_harvest_marker.h"
 #include "M_online_players.h"
 #include "Messages.h"
+#include "M_console_helper.h"
 
 
 /*
@@ -23,6 +24,8 @@ ShooterGameServer.exe!AInstancedFoliageActor::TryMultiUse() (0x00007ff7ea90cd67)
 */
 
 // UPrimalItem * AddItem(FItemNetInfo * theItemInfo, bool bEquipItem, bool AddToSlot, bool bDontStack, FItemNetID * InventoryInsertAfterItemID, bool ShowHUDNotification, bool bDontRecalcSpoilingTime, bool bForceIncompleteStacking, AShooterCharacter * OwnerPlayer, bool bIgnoreAbsoluteMaxInventory) { return NativeCall<UPrimalItem *, FItemNetInfo *, bool, bool, bool, FItemNetID *, bool, bool, bool, AShooterCharacter *, bool>(this, "UPrimalInventoryComponent.AddItem", theItemInfo, bEquipItem, AddToSlot, bDontStack, InventoryInsertAfterItemID, ShowHUDNotification, bDontRecalcSpoilingTime, bForceIncompleteStacking, OwnerPlayer, bIgnoreAbsoluteMaxInventory); }
+// UPrimalItem * AddItem(FItemNetInfo * theItemInfo, bool bEquipItem, bool AddToSlot, bool bDontStack, FItemNetID * InventoryInsertAfterItemID, bool ShowHUDNotification, bool bDontRecalcSpoilingTime, bool bForceIncompleteStacking, AShooterCharacter * OwnerPlayer, bool bIgnoreAbsoluteMaxInventory) { return NativeCall<UPrimalItem *, FItemNetInfo *, bool, bool, bool, FItemNetID *, bool, bool, bool, AShooterCharacter *, bool>(this, "UPrimalInventoryComponent.AddItem", theItemInfo, bEquipItem, AddToSlot, bDontStack, InventoryInsertAfterItemID, ShowHUDNotification, bDontRecalcSpoilingTime, bForceIncompleteStacking, OwnerPlayer, bIgnoreAbsoluteMaxInventory); }
+
 DECLARE_HOOK(UPrimalInventoryComponent_AddItem, UPrimalItem *, UPrimalInventoryComponent *, FItemNetInfo * theItemInfo, bool bEquipItem, bool AddToSlot, bool bDontStack, FItemNetID * InventoryInsertAfterItemID, bool ShowHUDNotification, bool bDontRecalcSpoilingTime, bool bForceIncompleteStacking, AShooterCharacter * OwnerPlayer, bool bIgnoreAbsoluteMaxInventory);
 UPrimalItem *Hook_UPrimalInventoryComponent_AddItem(UPrimalInventoryComponent *this_, FItemNetInfo * theItemInfo, bool bEquipItem, bool AddToSlot,
 	bool bDontStack, FItemNetID * InventoryInsertAfterItemID, bool ShowHUDNotification, bool bDontRecalcSpoilingTime, bool bForceIncompleteStacking,
@@ -76,6 +79,11 @@ UPrimalItem *Hook_UPrimalInventoryComponent_AddItem(UPrimalInventoryComponent *t
 		*a = 1;
 	}
 	*/
+
+	_l(SN_Inventory, "");
+	_l(SN_Inventory, "[*] Inventory.AddItem ----- before -----");
+	_l(SN_Inventory, "oid %lld lid %lld q %u bIsEquipped %d bIsSlot %d", oid, lid, q, theItemInfo->bIsEquipped().Get(), theItemInfo->bIsSlot().Get());
+	// Log::GetLog()->info("oid {} lid {} q {} bIsEquipped {} bIsSlot {}", oid, lid, q, theItemInfo->bIsEquipped().Get(), theItemInfo->bIsSlot().Get());
 
 	Log::GetLog()->info("");
 	Log::GetLog()->info("[*] Inventory.AddItem ----- before -----");
@@ -134,6 +142,8 @@ UPrimalItem *Hook_UPrimalInventoryComponent_AddItem(UPrimalInventoryComponent *t
 	}
 
 	Log::GetLog()->info("[*] ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
+	_l(SN_Inventory, "[*] ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+	_l(SN_Inventory, "");
 
 	if (oi) {
 		oi->lastUpdatedItem = 0;
@@ -144,6 +154,9 @@ UPrimalItem *Hook_UPrimalInventoryComponent_AddItem(UPrimalInventoryComponent *t
 	// UPrimalItem *oitem = 0;
 	{
 		q = theItemInfo->ItemQuantityField();
+
+		_l(SN_Inventory, "");
+		_l(SN_Inventory, "[*] Inventory.AddItem ----- after -----");
 
 		Log::GetLog()->info("");
 		Log::GetLog()->info("[*] Inventory.AddItem ----- after -----");
@@ -263,6 +276,8 @@ UPrimalItem *Hook_UPrimalInventoryComponent_AddItem(UPrimalInventoryComponent *t
 }
 
 // void NotifyItemQuantityUpdated(UPrimalItem * anItem, int amount) { NativeCall<void, UPrimalItem *, int>(this, "UPrimalInventoryComponent.NotifyItemQuantityUpdated", anItem, amount); }
+// void NotifyItemQuantityUpdated(UPrimalItem * anItem, int amount) { NativeCall<void, UPrimalItem *, int>(this, "UPrimalInventoryComponent.NotifyItemQuantityUpdated", anItem, amount); }
+
 DECLARE_HOOK(UPrimalInventoryComponent_NotifyItemQuantityUpdated, void, UPrimalInventoryComponent *, UPrimalItem * anItem, int amount);
 void Hook_UPrimalInventoryComponent_NotifyItemQuantityUpdated(UPrimalInventoryComponent *this_, UPrimalItem * anItem, int amount) {
 
@@ -383,6 +398,7 @@ ShooterGameServer.exe!UPrimalInventoryComponent::execServerForceMergeItemStack()
 
 */
 // void ServerForceMergeItemStack_Implementation(FItemNetID Item1ID, FItemNetID Item2ID) { NativeCall<void, FItemNetID, FItemNetID>(this, "UPrimalInventoryComponent.ServerForceMergeItemStack_Implementation", Item1ID, Item2ID); }
+// void ServerForceMergeItemStack_Implementation(FItemNetID Item1ID, FItemNetID Item2ID) { NativeCall<void, FItemNetID, FItemNetID>(this, "UPrimalInventoryComponent.ServerForceMergeItemStack_Implementation", Item1ID, Item2ID); }
 DECLARE_HOOK(UPrimalInventoryComponent_ServerForceMergeItemStack_Implementation, void, UPrimalInventoryComponent *, FItemNetID Item1ID, FItemNetID Item2ID);
 void Hook_UPrimalInventoryComponent_ServerForceMergeItemStack_Implementation(UPrimalInventoryComponent *this_, FItemNetID Item1ID, FItemNetID Item2ID) {
 
@@ -480,6 +496,7 @@ KERNEL32.DLL!UnknownFunction (0x00007ffd91883034) + 0 bytes [UnknownFile:0]
 ntdll.dll!UnknownFunction (0x00007ffd93421461) + 0 bytes [UnknownFile:0]
 ntdll.dll!UnknownFunction (0x00007ffd93421461) + 0 bytes [UnknownFile:0]
 */
+// bool RemoveItem(FItemNetID * itemID, bool bDoDrop, bool bSecondryAction, bool bForceRemoval, bool showHUDMessage) { return NativeCall<bool, FItemNetID *, bool, bool, bool, bool>(this, "UPrimalInventoryComponent.RemoveItem", itemID, bDoDrop, bSecondryAction, bForceRemoval, showHUDMessage); }
 // bool RemoveItem(FItemNetID * itemID, bool bDoDrop, bool bSecondryAction, bool bForceRemoval, bool showHUDMessage) { return NativeCall<bool, FItemNetID *, bool, bool, bool, bool>(this, "UPrimalInventoryComponent.RemoveItem", itemID, bDoDrop, bSecondryAction, bForceRemoval, showHUDMessage); }
 DECLARE_HOOK(UPrimalInventoryComponent_RemoveItem, bool, UPrimalInventoryComponent *, FItemNetID * itemID, bool bDoDrop, bool bSecondryAction, bool bForceRemoval, bool showHUDMessage);
 bool Hook_UPrimalInventoryComponent_RemoveItem(UPrimalInventoryComponent *this_, FItemNetID * itemID, bool bDoDrop, bool bSecondryAction, bool bForceRemoval,
@@ -724,6 +741,8 @@ void Hook_AShooterPlayerController_ServerTransferFromRemoteInventory_Implementat
 
 	Log::GetLog()->info("AShooterPlayerController.TransferFromRemoteInventory after");
 }
+
+// void NotifyItemAdded(UPrimalItem * anItem, bool bEquipItem) { NativeCall<void, UPrimalItem *, bool>(this, "APrimalCharacter.NotifyItemAdded", anItem, bEquipItem); }
 
 DECLARE_HOOK(APrimalCharacter_NotifyItemAdded, void, APrimalCharacter *, UPrimalItem *, bool);
 void Hook_APrimalCharacter_NotifyItemAdded(APrimalCharacter *this_, UPrimalItem * anItem, bool bEquipItem) {

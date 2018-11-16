@@ -6,8 +6,6 @@
 #include "M_config_reader.h"
 #include "processthreadsapi.h"
 
-BoxWithVScroll *logBox;
-
 class MyCH : public ConsoleHelper {
 
 public:
@@ -53,31 +51,72 @@ public:
 	}
 };
 
-class CtrlC : public CHElement {
-public:
-	volatile bool exitFlag;
-	CtrlC() : CHElement("ctrlc", false), exitFlag(false) {
 
-	}
 
-	virtual bool onKey(KEY_EVENT_RECORD ke) {
-		if (ke.wVirtualKeyCode == 67 && ke.dwControlKeyState & 8) {
-			exitFlag = true;
+void installControls() {
+
+	auto t1 = new CHTitle("menu1 name", 4, 2, "Control", 20);
+	t1->color = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+	t1->add();
+
+	t1 = new CHTitle("menu2 name", 4, 12, "Section actions", 20);
+	t1->color = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+	t1->add();
+
+	auto box = new BoxWithVScroll("log1", 1, 3, -50, -80, true);
+	box->add();
+
+	auto menu = new CHMenu("menu1", 6, 4, 20);
+	menu->addMenu("Inventory hooks");
+	menu->addMenu("Players activity");
+	menu->addMenu("Players events");
+	menu->add();
+
+	auto mt = new Menu1Treator("mt1", menu, box);
+	mt->addLinesHolder(SN_Inventory);
+	mt->addLinesHolder("Players");
+	mt->add();
+
+	auto title = new CHTitle("section_info0", 4, 14, "", 30);
+	title->add();
+	title = new CHTitle("section_info1", 4, 15, "", 30);
+	title->add();
+
+	auto s1 = new InventorySection(mt->getLinesHolder(SN_Inventory));
+	mt->addSection(s1);
+
+	// mt->pushLine("Inventory", b);
+}
+
+char buf[4096];
+void _l(std::string &sn, const char * format, ...) {
+	auto mt = (Menu1Treator *)ConsoleHelper::_getElement("mt1");
+	if (mt) {
+		auto lh = mt->getLinesHolder(sn);
+		if (lh) {
+			
+			va_list argptr;
+			va_start(argptr, format);
+			vsprintf(buf, format, argptr);
+			va_end(argptr);
+
+			lh->pushLine(buf);
 		}
-		return false;
 	}
-};
-
-CtrlC *ctrlC = 0;
+}
 
 bool bFirstTime, exited;
 void __Timer2() {
+
 	if (bFirstTime && ConsoleHelper::instance) {
 		bFirstTime = false;
 		ConsoleHelper::instance->clear();
 		auto e = ConsoleHelper::instance->getElement("loading");
 		ConsoleHelper::instance->delElement(e);
+		installControls();
 	}
+
+	auto ctrlC = (CtrlC *)ConsoleHelper::_getElement("ctrlc");
 	if (!exited && ctrlC && ctrlC->exitFlag) {
 		exited = true;
 		if (!bFirstTime) {
@@ -87,16 +126,7 @@ void __Timer2() {
 		}
 
 		Log::GetLog()->error("Exit");
-
-		// ArkApi::GetApiUtils().GetWorld()->
-		// Log::GetLog()->info("Exit."); 
-		// throw std::runtime_error("Exit");
-		/*
-		FreeConsole();
-		ExitProcess(0);
-		exit(0);
-		*/
-		// char *a = 0; *a = 0;
+		throw std::runtime_error("Exit");
 	}
 }
 
@@ -113,11 +143,12 @@ void Hook_UWorld_InitWorld(UWorld *w, DWORD64 p) {
 
 bool M_console_helper_init() {
 
-	bFirstTime = true;
+	
 	exited = false;
 
 	new MyCH();
-	ctrlC = new CtrlC();
+
+	auto ctrlC = new CtrlC();
 	ctrlC->add();
 
 	auto t1 = new CHTitle("title", 0, 0, std::string("ArkUpgrade server:"), 18, false);
@@ -128,23 +159,15 @@ bool M_console_helper_init() {
 	t1->add();
 	
 	if (ArkApi::GetApiUtils().GetWorld()) {
-
+		bFirstTime = false;
+		installControls();
 	}
 	else {
+		bFirstTime = true;
 		t1 = new CHTitle("loading", 0, 2, std::string("Loading . . "), 40, false);
 		t1->add();
 	}
-
-	logBox = new BoxWithVScroll("log1", 1, 3, -50, -80, true);
-
-	t1 = new CHTitle("menu1 name", 4, 2, "Control", 20);
-	t1->color = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
-	t1->add();
-
-	t1 = new CHTitle("menu2 name", 4, 12, "Section actions", 20);
-	t1->color = FOREGROUND_BLUE | FOREGROUND_INTENSITY;
-	t1->add();
-
+	
 
 	ArkApi::GetCommands().AddOnTimerCallback("__Timer2", &__Timer2);
 
@@ -160,8 +183,6 @@ bool M_console_helper_done() {
 	auto c = ConsoleHelper::instance;
 	ConsoleHelper::instance = 0;
 	delete c;
-
-	delete logBox;
 
 	return true;
 }

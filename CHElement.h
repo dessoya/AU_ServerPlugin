@@ -4,6 +4,7 @@
 #include <string>
 #include "Lock.h"
 #include <vector>
+#include <map>
 
 class CHElement;
 
@@ -138,6 +139,7 @@ class LinesHolder {
 public:
 	std::vector<std::string> lines;
 	LinesHolderChangeReceiver *receiver;
+	bool needReceiveLines;
 
 	LinesHolder();
 	void pushLine(std::string line);
@@ -175,3 +177,104 @@ public:
 	// void pushLine(std::string line);
 	CHBoxVScroll *getBox();
 };
+
+
+class CtrlC : public CHElement {
+public:
+	volatile bool exitFlag;
+	CtrlC() : CHElement("ctrlc", false), exitFlag(false) {
+
+	}
+
+	virtual bool onKey(KEY_EVENT_RECORD ke) {
+		if (ke.wVirtualKeyCode == 67 && ke.dwControlKeyState & 8) {
+			exitFlag = true;
+		}
+		return false;
+	}
+};
+
+
+
+// ----------------------------------------------------------------------------------
+
+
+
+class CHMenu : public CHElement, public AreaClickReceiver {
+public:
+	std::vector<std::string> items;
+	int x, y, w;
+	bool markerCreated;
+	std::string currentItem;
+	MenuItemClickReceiver *menuItemClickReceiver;
+
+	CHMenu(std::string name_, int x_, int y_, int w_);
+	void addMenu(std::string title);
+	virtual void onAreaClick(CHElement *e);
+};
+
+
+
+
+// ----------------------------------------------------------------------------------
+
+
+
+
+
+
+class Section : public CHElement {
+public:
+	Section(std::string name_);
+	virtual void activate();
+	virtual void onKeyDown(KEY_EVENT_RECORD ke);
+	static void setInfo(std::string info, int n = 0);
+};
+
+
+
+
+// ----------------------------------------------------------------------------------
+
+
+
+
+
+class Menu1Treator : public CHElement, public MenuItemClickReceiver {
+public:
+
+	std::map<std::string, LinesHolder *> linesHolders;
+	CHMenu *menu;
+	BoxWithVScroll *box;
+
+	Section *currentSection;
+	std::map<std::string, Section *> sections;
+
+	Menu1Treator(std::string name, CHMenu *menu_, BoxWithVScroll *box_);
+	virtual bool onKey(KEY_EVENT_RECORD ke);
+	void addLinesHolder(std::string name);
+	LinesHolder *getLinesHolder(std::string name);
+	void addSection(Section *s);
+	void activateSection(std::string name);
+	virtual void onMenuItemClick(std::string name);
+	void pushLine(std::string linesHolderName, std::string line);
+};
+
+
+
+// ----------------------------------------------------------------------------------
+
+
+
+
+
+
+class InventorySection : public Section {
+public:
+	LinesHolder *linesHolder;	
+
+	InventorySection(LinesHolder *linesHolder_);
+	virtual void activate();
+	virtual void onKeyDown(KEY_EVENT_RECORD ke);
+};
+

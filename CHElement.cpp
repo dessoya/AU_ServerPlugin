@@ -1,7 +1,7 @@
-#include "pch.h"
+// #include "pch.h"
 #include "CHElement.h"
 #include "ConsoleHelper.h"
-//#include <API/ARK/Ark.h>
+#include <API/ARK/Ark.h>
 
 
 CHElement::CHElement(std::string name_, bool isRender_) : name(name_), isRender(isRender_) {
@@ -379,13 +379,15 @@ void BoxWithVScroll::pushLine(std::string line) {
 
 
 
-LinesHolder::LinesHolder() : receiver(0) {
+LinesHolder::LinesHolder() : receiver(0), needReceiveLines(false) {
 
 }
 
 void LinesHolder::pushLine(std::string line) {
-	lines.push_back(line);
-	if (receiver) receiver->onPushLine();
+	if (needReceiveLines) {
+		lines.push_back(line);
+		if (receiver) receiver->onPushLine();
+	}
 }
 
 void LinesHolder::clear() {
@@ -393,3 +395,212 @@ void LinesHolder::clear() {
 	if (receiver) receiver->onClearLines();
 
 }
+
+
+
+// ----------------------------------------------------------------------------------
+
+
+
+
+CHMenu::CHMenu(std::string name_, int x_, int y_, int w_) : CHElement(name_), x(x_), y(y_), w(w_) {
+	markerCreated = false;
+	menuItemClickReceiver = 0;
+}
+
+void CHMenu::addMenu(std::string title) {
+	auto o = items.size();
+	auto id = name + ":item:" + std::to_string(o);
+	auto t = new CHTitle(id, x, y + (int)o, title, w, false);
+	t->areaClickReceiver = this;
+	items.push_back(id);
+	t->add();
+}
+
+void CHMenu::onAreaClick(CHElement *e) {
+	auto r = (CHRenderElement *)e;
+
+	if (markerCreated) {
+		if (currentItem != r->name) {
+			currentItem = r->name;
+			auto t = (CHRenderElement *)ConsoleHelper::_getElement(name + ":marker:left");
+			ConsoleHelper::instance->moveElement(t, x - 2, r->y);
+			t = (CHRenderElement *)ConsoleHelper::_getElement(name + ":marker:right");
+			ConsoleHelper::instance->moveElement(t, x + w + 2, r->y);
+			if (menuItemClickReceiver) menuItemClickReceiver->onMenuItemClick(currentItem);
+		}
+	}
+	else {
+		markerCreated = true;
+		currentItem = r->name;
+		auto t = new CHTitle(name + ":marker:left", x - 2, r->y, "[", 1, false);
+		t->add();
+
+		t = new CHTitle(name + ":marker:right", x + w + 2, r->y, "]", 1, false);
+		t->add();
+		if (menuItemClickReceiver) menuItemClickReceiver->onMenuItemClick(currentItem);
+	}
+}
+
+
+
+// ----------------------------------------------------------------------------------
+
+
+
+
+Section::Section(std::string name_) : CHElement(name_) {
+
+}
+
+void Section::activate() {
+
+}
+
+void Section::onKeyDown(KEY_EVENT_RECORD ke) {
+}
+
+void Section::setInfo(std::string info, int n) {
+	auto e = (CHTitle *)ConsoleHelper::_getElement("section_info" + std::to_string(n));
+	if (e) {
+		e->setTitle(info);
+	}
+}
+
+// ----------------------------------------------------------------------------------
+
+
+std::string SN_Inventory = "Inventory";
+
+
+
+
+Menu1Treator::Menu1Treator(std::string name, CHMenu *menu_, BoxWithVScroll *box_)
+	: CHElement(name, false), menu(menu_), box(box_) {
+
+	currentSection = 0;
+	menu->menuItemClickReceiver = this;
+}
+
+bool Menu1Treator::onKey(KEY_EVENT_RECORD ke) {
+	if (ke.bKeyDown) {
+		if (currentSection) {
+			currentSection->onKeyDown(ke);
+		}		
+	}
+	return false;
+}
+
+void Menu1Treator::addLinesHolder(std::string name) {
+	auto lh = new LinesHolder();
+	linesHolders.insert(std::pair<std::string, LinesHolder *>(name, lh));
+}
+
+LinesHolder *Menu1Treator::getLinesHolder(std::string name) {
+	auto it = linesHolders.find(name);
+	if (it == linesHolders.end()) return 0;
+	return it->second;
+}
+
+void Menu1Treator::addSection(Section *s) {
+	sections.insert(std::pair<std::string, Section *>(s->name, s));
+}
+
+void Menu1Treator::activateSection(std::string name) {
+	for (int i = 0; i < 2; i++) Section::setInfo("", i);
+	Section *newSection = 0;
+	auto it = sections.find(name);
+	if (it != sections.end()) {
+		newSection = it->second;
+	}
+
+
+	currentSection = newSection;
+	if (currentSection) {
+		currentSection->activate();
+	}
+
+}
+
+void Menu1Treator::onMenuItemClick(std::string name) {
+
+	if (name == "menu1:item:0") {
+		box->getBox()->setupLinesHolder(getLinesHolder(SN_Inventory));
+		activateSection(SN_Inventory);
+	}
+	else if (name == "menu1:item:1") {
+		box->getBox()->setupLinesHolder(getLinesHolder("Players"));
+		activateSection("Players");
+	}
+	else {
+		box->getBox()->setupLinesHolder(0);
+		activateSection("");
+	}
+}
+
+void Menu1Treator::pushLine(std::string linesHolderName, std::string line) {
+	auto it = linesHolders.find(linesHolderName);
+	if (it != linesHolders.end()) {
+		auto lh = it->second;
+		lh->pushLine(line);
+	}
+}
+
+
+
+
+// ----------------------------------------------------------------------------------
+
+
+
+
+InventorySection::InventorySection(LinesHolder *linesHolder_) : Section(SN_Inventory), linesHolder(linesHolder_) { }
+
+void InventorySection::activate() {
+	if (linesHolder->needReceiveLines) {
+		setInfo("[S] stop logging");
+	}
+	else {
+		setInfo("[S] start logging");
+	}
+	setInfo("[C] clear", 1);
+}
+
+void InventorySection::onKeyDown(KEY_EVENT_RECORD ke) {
+	if (ke.dwControlKeyState != 0) return;
+	// C - key
+	if (ke.wVirtualKeyCode == 67) {
+
+		std::string s;
+		auto it = linesHolder->lines.begin();
+		while (it != linesHolder->lines.end()) {
+			auto line = *it;
+			s += "\n" + line;
+			it++;
+		}
+
+		OpenClipboard(0);
+		EmptyClipboard();
+		HGLOBAL clipbuffer;
+		char * buffer;
+		clipbuffer = GlobalAlloc(GMEM_DDESHARE, s.length() + 1);
+		buffer = (char*)GlobalLock(clipbuffer);
+		strcpy_s(buffer, s.length() + 1, s.c_str());
+		GlobalUnlock(clipbuffer);
+		SetClipboardData(CF_TEXT, clipbuffer);
+		CloseClipboard();
+
+		linesHolder->clear();
+	}
+	// S - key
+	else if (ke.wVirtualKeyCode == 83) {
+		linesHolder->needReceiveLines = !linesHolder->needReceiveLines;
+		activate();
+	}
+}
+
+
+
+// ----------------------------------------------------------------------------------
+
+
