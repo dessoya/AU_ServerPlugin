@@ -1,7 +1,7 @@
-// #include "pch.h"
+#include "pch.h"
 #include "CHElement.h"
 #include "ConsoleHelper.h"
-#include <API/ARK/Ark.h>
+// #include <API/ARK/Ark.h>
 
 
 CHElement::CHElement(std::string name_, bool isRender_) : name(name_), isRender(isRender_) {
@@ -26,6 +26,12 @@ void CHElement::add() {
 		ConsoleHelper::instance->addElement(this);
 	}
 }
+
+
+
+// ----------------------------------------------------------------------------------
+
+
 
 CHRenderElement::CHRenderElement(std::string name_, int x_, int y_, int w_, int h_, bool stickRight_) : CHElement(name_, true),
 	x(x_), ox(x_), oy(y_), y(y_), w(w_), h(h_), waling(false), stickRight(stickRight_), color(7) {
@@ -257,6 +263,22 @@ void CHBoxVScroll::onPushLine() {
 	}
 }
 
+void CHBoxVScroll::onPopLine() {
+
+	bool lastPos = vscroll->total == vscroll->visible + vscroll->pos;
+
+	vscroll->lock();
+	vscroll->total = (int)linesHolder->lines.size();
+	if (vscroll->pos > vscroll->total - vscroll->visible) vscroll->pos = vscroll->total - vscroll->visible;
+	vscroll->unlock();
+	
+	vscroll->updateRegions();
+	vscroll->update();
+
+	update();
+
+}
+
 void CHBoxVScroll::onClearLines() {
 	vscroll->lock();
 	vscroll->total = 1;
@@ -324,18 +346,6 @@ void CHTitle::setFocus() {
 	update();
 }
 
-void CHTitle::onWHeeled(int dir) {
-	/*
-	if (dir > 0) {
-		color++;
-	}
-	else {
-		color--;
-	}
-	update();
-	*/
-}
-
 void CHTitle::onMouse(MOUSE_EVENT_RECORD me) {
 	if (me.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED) {
 		if (areaClickReceiver) {
@@ -351,15 +361,11 @@ void CHTitle::onMouse(MOUSE_EVENT_RECORD me) {
 BoxWithVScroll::BoxWithVScroll(std::string name_, int x, int y, int w, int h, bool stickRight) : CHElement(name_) {
 
 	if (stickRight) {
-		// Log::GetLog()->info("BoxWithVScroll 1");
 
 		auto vs = new VScroll(name + ":vs", x, y, h, true, 1, 0, 1);
-		// Log::GetLog()->info("BoxWithVScroll 2");
 		vs->add();
-		// Log::GetLog()->info("BoxWithVScroll 3");
 
 		auto box = new CHBoxVScroll(name + ":box", x + 1, y, w, h, true, vs);
-		// box->color = 0xf8;
 		box->add();
 		vs->onChangeReceiver = box;
 	}
@@ -370,16 +376,8 @@ CHBoxVScroll *BoxWithVScroll::getBox() {
 }
 
 
-/*
-void BoxWithVScroll::pushLine(std::string line) {
-	CHBoxVScroll *box = (CHBoxVScroll *)ConsoleHelper::_getElement(name + ":box");
-	if (box) box->pushLine(line);
-}
-*/
 
-
-
-LinesHolder::LinesHolder() : receiver(0), needReceiveLines(false) {
+LinesHolder::LinesHolder(int limit_) : limit(limit_), receiver(0), needReceiveLines(false) {
 
 }
 
@@ -387,6 +385,11 @@ void LinesHolder::pushLine(std::string line) {
 	if (needReceiveLines) {
 		lines.push_back(line);
 		if (receiver) receiver->onPushLine();
+		auto s = (int)lines.size();
+		if (s > limit) {
+			lines.erase(lines.begin());
+			if (receiver) receiver->onPopLine();
+		}
 	}
 }
 
@@ -410,7 +413,7 @@ CHMenu::CHMenu(std::string name_, int x_, int y_, int w_) : CHElement(name_), x(
 
 void CHMenu::addMenu(std::string title) {
 	auto o = items.size();
-	auto id = name + ":item:" + std::to_string(o);
+	auto id = name + ":item:" + title;
 	auto t = new CHTitle(id, x, y + (int)o, title, w, false);
 	t->areaClickReceiver = this;
 	items.push_back(id);
@@ -470,7 +473,7 @@ void Section::setInfo(std::string info, int n) {
 // ----------------------------------------------------------------------------------
 
 
-std::string SN_Inventory = "Inventory";
+std::string SN_Inventory = "Inventory events";
 
 
 
@@ -503,7 +506,10 @@ LinesHolder *Menu1Treator::getLinesHolder(std::string name) {
 }
 
 void Menu1Treator::addSection(Section *s) {
-	sections.insert(std::pair<std::string, Section *>(s->name, s));
+	sections[s->name] = s;
+	std::string menuItemSearcher = menu->name + ":item:" + s->name;
+
+	menuItemSections[menuItemSearcher] = s;
 }
 
 void Menu1Treator::activateSection(std::string name) {
@@ -524,13 +530,11 @@ void Menu1Treator::activateSection(std::string name) {
 
 void Menu1Treator::onMenuItemClick(std::string name) {
 
-	if (name == "menu1:item:0") {
-		box->getBox()->setupLinesHolder(getLinesHolder(SN_Inventory));
-		activateSection(SN_Inventory);
-	}
-	else if (name == "menu1:item:1") {
-		box->getBox()->setupLinesHolder(getLinesHolder("Players"));
-		activateSection("Players");
+	auto i = menuItemSections[name];
+
+	if (i) {
+		box->getBox()->setupLinesHolder(getLinesHolder(i->name));
+		activateSection(i->name);
 	}
 	else {
 		box->getBox()->setupLinesHolder(0);

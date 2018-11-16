@@ -4,7 +4,10 @@
 #include <string>
 #include "Lock.h"
 #include <vector>
+#include <stack>
 #include <map>
+
+extern std::string SN_Inventory;
 
 class CHElement;
 
@@ -26,6 +29,7 @@ public:
 class LinesHolderChangeReceiver {
 public:
 	virtual void onPushLine() = 0;
+	virtual void onPopLine() = 0;
 	virtual void onClearLines() = 0;
 };
 
@@ -56,7 +60,6 @@ public:
 
 
 class CHRenderElement : public CHElement  {
-
 public:
 
 	int ox, oy;
@@ -96,7 +99,6 @@ public:
 	void setTitle(std::string title_);
 	virtual void lostFocus();
 	virtual void setFocus();
-	virtual void onWHeeled(int dir);
 	virtual void onMouse(MOUSE_EVENT_RECORD me);
 };
 
@@ -140,8 +142,9 @@ public:
 	std::vector<std::string> lines;
 	LinesHolderChangeReceiver *receiver;
 	bool needReceiveLines;
+	int limit;
 
-	LinesHolder();
+	LinesHolder(int limit_ = 50);
 	void pushLine(std::string line);
 	void clear();
 };
@@ -152,13 +155,11 @@ public:
 	int pos;
 	LinesHolder *linesHolder;
 
-	// std::vector<std::string> lines;
-
 	CHBoxVScroll(std::string, int x_, int y_, int w_, int h_, bool stickRight_, VScroll *vscroll_);
 
-	// void pushLine(std::string line);
 	void setupLinesHolder(LinesHolder *);
 	virtual void onPushLine();
+	virtual void onPopLine();
 	virtual void onClearLines();
 
 	virtual void onWHeeled(int dir);
@@ -172,9 +173,7 @@ public:
 
 class BoxWithVScroll : public CHElement {
 public:
-
 	BoxWithVScroll(std::string name_, int x, int y, int w, int h, bool stickRight);
-	// void pushLine(std::string line);
 	CHBoxVScroll *getBox();
 };
 
@@ -196,7 +195,11 @@ public:
 
 
 
+
+
 // ----------------------------------------------------------------------------------
+
+
 
 
 
@@ -249,6 +252,7 @@ public:
 
 	Section *currentSection;
 	std::map<std::string, Section *> sections;
+	std::map<std::string, Section *> menuItemSections;
 
 	Menu1Treator(std::string name, CHMenu *menu_, BoxWithVScroll *box_);
 	virtual bool onKey(KEY_EVENT_RECORD ke);
@@ -259,6 +263,9 @@ public:
 	virtual void onMenuItemClick(std::string name);
 	void pushLine(std::string linesHolderName, std::string line);
 };
+
+
+
 
 
 

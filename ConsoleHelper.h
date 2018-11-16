@@ -20,8 +20,9 @@ public:
 
 	std::map<std::string, CHElement *> elements;
 	std::vector<CHRenderElement *> renderElements;
+	std::map<std::string, CHRenderElement *> needRedrawElements;
 
-	Lock elementsLock, outLock;
+	Lock elementsLock, outLock, updateLock, deleteLock;
 
 	HANDLE hthread;
 	volatile bool needExit, executeState;
@@ -31,31 +32,24 @@ public:
 
 	void addElement(CHElement *element);
 	void delElement(CHElement *element);
+
 	CHElement *getElement(std::string name);
+	static CHElement *_getElement(std::string name);
 
 	void moveElement(CHRenderElement *element, int, int);
 	void drawElement(CHRenderElement *element);
+	void updateElements();
 
 	void outstr(std::string, bool nc, int w);
 	void outWithSpaces(std::string s, bool nc, int w, bool waling);
 
 	void processInpitEvents();
 
-	virtual void onClear() {}
 	virtual void onKey(KEY_EVENT_RECORD ke);
 	virtual void onMouse(MOUSE_EVENT_RECORD me);
 
 	void clear();
 
-	// ctrl + c
-	/*
-	static BOOL WINAPI _HandlerRoutine(DWORD dwCtrlType) {
-		return true;
-	}
-	*/
-
 	void setPos(int x, int y);
 	DWORD thread();
-
-	static CHElement *_getElement(std::string name);
 };
