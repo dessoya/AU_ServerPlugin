@@ -144,7 +144,7 @@ public:
 	bool needReceiveLines;
 	int limit;
 
-	LinesHolder(int limit_ = 50);
+	LinesHolder(int limit_ = 1000);
 	void pushLine(std::string line);
 	void clear();
 };

@@ -46,6 +46,7 @@ enum MessageTypes {
 	m_system_add_string_to_library,
 	m_server_start,
 	m_stop_work,
+	m_player_online,					// 4
 
 	m_player_create = 16,				// 
 	m_player_login,						// 17
@@ -55,11 +56,20 @@ enum MessageTypes {
 	m_player_active_online,				// 21
 	m_player_pasive_online,				// 22
 	m_player_set_pos_and_activity,
-	m_player_update_inventory,
-	m_server_ping,
+	m_player_update_inventory,						// 24 depricated
+	m_server_ping,						// 25
 	m_player_die,
 	m_player_learn_engram,
-	m_player_update_inventory_with_quality
+	m_player_update_inventory_with_quality,			// 28 depricated 
+
+	m_player_harvest2,					// 29
+	m_player_update_inventory2,			// 30
+};
+
+enum HarvestType {
+	ht_hand = 0,
+	ht_dino,
+	ht_dam,
 };
 
 enum PlayerActivity {

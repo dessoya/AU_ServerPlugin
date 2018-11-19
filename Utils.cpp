@@ -28,8 +28,16 @@ FString _child("_Child_C"); // mod stacks
 
 FString _bp(UObjectBase* object) {
 	if (!object) return _e;
+
+	/*
 	auto cf = object->ClassField();
 	if (!cf) return _e;
+	*/
+
+	return _bp(object->ClassField());
+}
+
+FString _bp(UClass *cf) {
 
 	FString path_name("");
 
@@ -51,6 +59,8 @@ FString _bp(UObjectBase* object) {
 }
 
 FString __getClassName(AActor *o) {
+
+	if (o == 0) return "zero";
 
 	if (o->IsA(AShooterCharacter::GetPrivateStaticClass())) {
 		return "AShooterCharacter";

@@ -1,7 +1,7 @@
-#include "pch.h"
+// #include "pch.h"
 #include "CHElement.h"
 #include "ConsoleHelper.h"
-// #include <API/ARK/Ark.h>
+#include <API/ARK/Ark.h>
 
 
 CHElement::CHElement(std::string name_, bool isRender_) : name(name_), isRender(isRender_) {

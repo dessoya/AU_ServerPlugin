@@ -15,18 +15,32 @@ struct OnlinePlayerInfo {
 	// bool mergeItemStack;
 	bool skipAddRemoveUpdateItems;
 
+	// harvest mechanic
 	UPrimalItem *lastUpdatedItem;
+	// int harvestCount;
+	bool inAddItem;
+	bool needharvest;
+	bool inTransferFrom;
 
-	typedef std::map<unsigned long long, bool> Inventory;
-	Inventory inventory;
+	bool onDino;
+
+	// typedef std::map<unsigned long long, bool> Inventory;
+	// Inventory inventory;
+
 	std::chrono::time_point<std::chrono::system_clock> create_tm;
-
 	std::chrono::time_point<std::chrono::system_clock> last_time;
+
 	OnlinePlayerInfo(AShooterPlayerController *shooterPlayer_, unsigned long long id_, unsigned long long steamId_, std::chrono::time_point<std::chrono::system_clock> last_time_, float x_, float y_, float z_) :
 		shooterPlayer(shooterPlayer_), id(id_), steamId(steamId_), last_time(last_time_), x(x_), y(y_), z(z_) {
 		create_tm = cur_time;
 		tid = 0;
+
+		// harvestCount = 0;
 		lastUpdatedItem = 0;
+		inAddItem = false;
+		needharvest = false;
+		inTransferFrom = false;
+		onDino = false;
 
 		skipAddRemoveUpdateItems = false;
 		// mergeItemStack = false;
@@ -38,6 +52,7 @@ struct OnlinePlayerInfo {
 	}
 	*/
 
+	/*
 	bool itemInInventory(unsigned long long iid) {
 		return inventory.find(iid) != inventory.end();
 
@@ -49,6 +64,7 @@ struct OnlinePlayerInfo {
 	void delItemFromInventory(unsigned long long iid) {
 		inventory.erase(iid);
 	}
+	*/
 
 };
 
@@ -56,9 +72,11 @@ struct OnlinePlayerInfo {
 typedef void (*PlayerIterator)(void *ctx, OnlinePlayerInfo *info);
 
 class OnlinePlayers {
+public:
+
 	typedef std::map<unsigned long long, OnlinePlayerInfo *> PlayerIdMap;
 	PlayerIdMap playerIdMap;
-public:
+
 	OnlinePlayers();
 	~OnlinePlayers();
 

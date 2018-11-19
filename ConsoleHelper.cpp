@@ -1,6 +1,6 @@
-#include "pch.h"
+// #include "pch.h"
 #include "ConsoleHelper.h"
-// #include <API/ARK/Ark.h>
+#include <API/ARK/Ark.h>
 
 
 DWORD WINAPI ThreadFunction_ch(LPVOID lpParam);

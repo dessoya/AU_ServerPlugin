@@ -1,11 +1,16 @@
 #pragma once
 #include "Utils.h"
+#include "EventMessage.h"
 
 void _msg_m_player_die(ull pid);
 void _msg_m_player_learn_engram(ull pid, std::string engramName);
+
+void _msg_m_player_update_inventory2(ull pid, UPrimalItem *item, int q);
 void _msg_m_player_update_inventory_with_quality(ull pid, std::string itemName, unsigned int isbp,
 	std::string quality, unsigned int quality_index, std::string req, int q);
 void _msg_m_player_update_inventory(ull pid, std::string itemName, int q, int h, unsigned int isbp);
+void _msg_m_player_harvest2(ull pid, std::string itemName, unsigned int q, unsigned int ht);
+
 void _msg_m_build_structure(ull pid, std::string structureName, FVector *loc);
 void _msg_m_player_set_pos(ull pid, FVector *loc);
 void _msg_m_player_logout(ull pid, std::string steamId, std::string steamName, std::string name);

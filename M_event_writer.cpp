@@ -337,7 +337,7 @@ DWORD EventWriter::thread() {
 			auto dwWaitResult = WaitForSingleObject(queue_mutex, INFINITE);
 			if (WAIT_OBJECT_0 != dwWaitResult) {
 				// OutputDebugStringA("queue_mutex WaitForSingleObject problem\n");
-				Log::GetLog()->error("writerThread queue_mutex err0r");
+				Log::GetLog()->info("writerThread queue_mutex err0r");
 				goto error_exit;
 			}
 
@@ -364,7 +364,7 @@ DWORD EventWriter::thread() {
 
 			auto writed = _write(fd, writeBuffer, packetSize);
 			if (writed < packetSize) {
-				Log::GetLog()->error("writerThread write file error !!! writed < packetSize");
+				Log::GetLog()->info("writerThread write file error !!! writed < packetSize");
 				goto error_exit;
 			}
 			currentFilesize += packetSize;

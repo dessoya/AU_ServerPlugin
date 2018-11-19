@@ -20,6 +20,7 @@ enum ObjectTypes {
 };
 
 ItemInfo *makeItemInfo(UPrimalItem *item);
+FString _bp(UClass *cf);
 FString _bp(UObjectBase* object);
 std::string __formatText(FString s);
 FString __getClassName(AActor *o);

@@ -67,9 +67,9 @@ void installControls() {
 	box->add();
 
 	auto menu = new CHMenu("menu1", 6, 4, 20);
-	menu->addMenu("Inventory hooks");
 	menu->addMenu("Players activity");
 	menu->addMenu("Players events");
+	menu->addMenu(SN_Inventory);
 	menu->add();
 
 	auto mt = new Menu1Treator("mt1", menu, box);

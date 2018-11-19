@@ -25,6 +25,8 @@
 #include "M_structures.h"
 #include "M_inventory_and_harvest.h"
 
+// int ForceCreateTribe(FString * TribeName, int TeamOverride) { return NativeCall<int, FString *, int>(this, "AShooterGameMode.ForceCreateTribe", TribeName, TeamOverride); }
+
 
 // unsigned __int64 AddNewTribe(AShooterPlayerState * PlayerOwner, FString * TribeName, FTribeGovernment * TribeGovernment) { return NativeCall<unsigned __int64, AShooterPlayerState *, FString *, FTribeGovernment *>(this, "AShooterGameMode.AddNewTribe", PlayerOwner, TribeName, TribeGovernment); }
 DECLARE_HOOK(AShooterGameMode_AddNewTribe, unsigned __int64, AShooterGameMode *, AShooterPlayerState * PlayerOwner, FString * TribeName, FTribeGovernment * TribeGovernment);
@@ -92,7 +94,8 @@ void __rcon_TPDinoIdToPlayerId(RCONClientConnection* rcon_connection, RCONPacket
 					FRotator rot{ 0, 0, 0 };
 
 					dino->TeleportTo(&pos, &rot, true, false);
-					
+
+					dino->TargetingTeamField() = info->tid;					
 
 				}
 
@@ -262,7 +265,22 @@ void Load() {
 	m->push_array(1);
 	m->push_uint(m_server_start);
 	m->set_size();
-	eventWriter->push(m);	
+	eventWriter->push(m);
+	{
+		auto it = onlinePlayers->playerIdMap.begin();
+		while (it != onlinePlayers->playerIdMap.end()) {
+			auto oi = it->second;
+
+			EventMessage *m = new EventMessage();
+			m->push_array(2);
+			m->push_uint(m_player_online);
+			m->push_uint(oi->id);
+			m->set_size();
+			eventWriter->push(m);
+
+			it++;
+		}
+	}
 	
 	__register_rcon_command("GetTribeIdFromPlayerId", &__rcon_GetTribeIdFromPlayerId);
 	__register_rcon_command("TPDinoIdToPlayerId", &__rcon_TPDinoIdToPlayerId);

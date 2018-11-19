@@ -1,6 +1,7 @@
 #include "M_online_players.h"
 #include "Messages.h"
 #include "EventMessage.h"
+#include <API/UE/Math/ColorList.h>
 
 OnlinePlayers *onlinePlayers = 0;
 
@@ -42,6 +43,40 @@ OnlinePlayers::OnlinePlayers() {
 				insertPlayer(shooter_pc, sid);
 			}
 		}
+
+		auto mode = ArkApi::GetApiUtils().GetShooterGameMode();
+		if (mode) {
+			mode->RemoveInactivePlayersAndTribes();
+			auto tids = mode->TribesIdsField();
+			auto tidsarr = tids.Array();
+			for (int i = 0, m = tidsarr.Max(); i < m; i++) {
+				auto tid = tidsarr[i];
+				Log::GetLog()->info("[*] enum tribe id {}", tid);
+
+				
+				// FTribeData td;
+				// sizeof(td);
+
+				FTribeData* tribe_data = static_cast<FTribeData*>(FMemory::Malloc(0x128 + 0x28));
+				RtlSecureZeroMemory(tribe_data, 0x128 + 0x28);
+
+				if (ArkApi::GetApiUtils().GetShooterGameMode()->GetOrLoadTribeData(tid, tribe_data)) {
+
+				// if (mode->GetOrLoadTribeData(tid, &td)) {
+					// td.b
+					Log::GetLog()->info("[*] enum tribe name {}", tribe_data->TribeNameField().ToString());
+					/*
+					auto td2 = mode->GetTribeData(&td, tid);
+					if (td2) {
+					}
+					*/
+					
+				}
+
+				FMemory::Free(tribe_data);
+			}
+		}
+		
 	}
 	catch (...) {
 		Log::GetLog()->info("[*] can't read player controller list");
@@ -83,40 +118,72 @@ void OnlinePlayers::insertPlayer(AShooterPlayerController *shooter_pc, unsigned 
 			it++;
 		}
 	}
-	// Log::GetLog()->info("[*] OnlinePlayers::insertPlayer");
+
 	auto id = shooter_pc->LinkedPlayerIDField();
 	if (id == 0) return;
-	// Log::GetLog()->info("[*] OnlinePlayers::insertPlayer {}", id);
-
 	
+	auto info = playerIdMap[id];
 
-	auto state = shooter_pc->PlayerStateField();
-	unsigned long long tid = 0;
-	if (state) {
-		auto shstate = static_cast<AShooterPlayerState *>(shooter_pc->PlayerStateField());
-		if (shstate) {
-			tid = shstate->MyPlayerDataField()->MyDataField()->TribeIDField();
-			Log::GetLog()->info("[*] OnlinePlayers track pid {} tid {}", id, tid);
+	if (info == 0) {
+
+		auto state = shooter_pc->PlayerStateField();
+		AShooterPlayerState *shstate = 0;
+		unsigned long long tid = 0;
+		if (state) {
+			shstate = static_cast<AShooterPlayerState *>(shooter_pc->PlayerStateField());
+			if (shstate) {
+				tid = shstate->MyPlayerDataField()->MyDataField()->TribeIDField();
+				Log::GetLog()->info("[*] OnlinePlayers track pid {} tid {}", id, tid);
+			}
 		}
-	}
 
-	/*
-	PlayerOwner->MyPlayerDataField()->MyDataField()
-	c->
-	MyDataField
-	FPrimalPlayerDataStruct
-	TribeIDField()
-	*/
-
-
-	auto it = playerIdMap.find(id);
-	if (it == playerIdMap.end()) {
-		// Log::GetLog()->info("[*] OnlinePlayers::insertPlayer added");
 		FVector pos = shooter_pc->DefaultActorLocationField();
 		const auto now = std::chrono::system_clock::now();
-		OnlinePlayerInfo *info = new OnlinePlayerInfo(shooter_pc, id, steamId, now, pos.X, pos.Y, pos.Z);
+		info = new OnlinePlayerInfo(shooter_pc, id, steamId, now, pos.X, pos.Y, pos.Z);
 		info->tid = tid;
-		playerIdMap.insert(std::pair<unsigned long long, OnlinePlayerInfo *>(id, info));
+		playerIdMap[id] = info;
+
+		/*
+		if (tid == 0) {
+			auto world = ArkApi::GetApiUtils().GetWorld();
+			// world->Team
+			Log::GetLog()->info("[*] pid {} try to add to tribe", id);
+			auto mode = ArkApi::GetApiUtils().GetShooterGameMode();
+			if (mode) {
+				auto newtid = mode->GenerateTribeId();
+				FString tribeName = FString::Format("ttgghf1 {0}", newtid);
+				// tribeName.Format("ttgghf1 %d", newtid);
+				Log::GetLog()->info("[*] generate tribe name {}", tribeName.ToString());
+
+				Log::GetLog()->info("[*] GenerateTribeId {}", newtid);
+				auto tid_ = mode->ForceCreateTribe(&tribeName, newtid);
+				Log::GetLog()->info("[*] ForceCreateTribe {}", tid_);
+				if (shstate) {
+					auto fadd = mode->ForceAddPlayerToTribe(shstate, &tribeName);					
+					Log::GetLog()->info("[*] ForceAddPlayerToTribe {}", fadd);
+
+					FTribeData* tribe_data = static_cast<FTribeData*>(FMemory::Malloc(0x128 + 0x28));
+					RtlSecureZeroMemory(tribe_data, 0x128 + 0x28);
+
+					if (mode->GetOrLoadTribeData(newtid, tribe_data)) {
+
+						// if (mode->GetOrLoadTribeData(tid, &td)) {
+							// td.b
+						Log::GetLog()->info("[*] enum tribe name {}", tribe_data->TribeNameField().ToString());
+						tribe_data->OwnerPlayerDataIDField() = id;
+						tribe_data->TribeAdminsField().Add(id);
+						mode->UpdateTribeData(tribe_data);
+						// tribe_data->
+						// tribe_data->TribeGovernmentField().
+
+					}
+
+					FMemory::Free(tribe_data);
+				}
+			}
+		}
+		*/
+
 	}
 }
 
@@ -161,6 +228,56 @@ void OnlinePlayers::_t_collect_online_and_position(TimerContext *tctx) {
 			_msg_m_player_set_pos_and_activity(info->id, ms, activity_id, &pos);
 
 		}
+
+		/*
+		auto state = info->shooterPlayer->PlayerStateField();
+		AShooterPlayerState *shstate = 0;
+		unsigned long long tid = 0;
+		if (state) {
+			shstate = static_cast<AShooterPlayerState *>(info->shooterPlayer->PlayerStateField());
+			if (shstate) {
+				tid = shstate->MyPlayerDataField()->MyDataField()->TribeIDField();
+				// Log::GetLog()->info("[*] OnlinePlayers track pid {} tid {}", id, tid);
+			}
+		}
+
+		if (tid == 0) {
+			auto world = ArkApi::GetApiUtils().GetWorld();
+			Log::GetLog()->info("[*] pid {} try to add to tribe", info->id);
+			auto mode = ArkApi::GetApiUtils().GetShooterGameMode();
+			if (mode) {
+				auto newtid = mode->GenerateTribeId();
+				info->tid = newtid;
+				FString tribeName = FString::Format("ttgghf1 {0}", newtid);
+				// tribeName.Format("ttgghf1 %d", newtid);
+				Log::GetLog()->info("[*] generate tribe name {}", tribeName.ToString());
+
+				Log::GetLog()->info("[*] GenerateTribeId {}", newtid);
+				auto tid_ = mode->ForceCreateTribe(&tribeName, newtid);
+				Log::GetLog()->info("[*] ForceCreateTribe {}", tid_);
+				if (shstate) {
+					auto fadd = mode->ForceAddPlayerToTribe(shstate, &tribeName);
+					Log::GetLog()->info("[*] ForceAddPlayerToTribe {}", fadd);
+
+					FTribeData* tribe_data = static_cast<FTribeData*>(FMemory::Malloc(0x128 + 0x28));
+					RtlSecureZeroMemory(tribe_data, 0x128 + 0x28);
+
+					if (mode->GetOrLoadTribeData(newtid, tribe_data)) {
+
+						Log::GetLog()->info("[*] enum tribe name {}", tribe_data->TribeNameField().ToString());
+						tribe_data->OwnerPlayerDataIDField() = info->id;
+						tribe_data->TribeAdminsField().Add(info->id);
+						mode->UpdateTribeData(tribe_data);
+
+						FString fs1("Force add to tribe");
+						info->shooterPlayer->ClientServerChatDirectMessage(&fs1, FColorList::Red, false);
+					}
+
+					FMemory::Free(tribe_data);
+				}
+			}
+		}
+		*/
 
 		info->last_time = cur_time;
 		Log::GetLog()->info("[*] update player activity {} id {} ms {}", activity_id, info->id, ms);
