@@ -21,6 +21,7 @@ struct OnlinePlayerInfo {
 	bool inAddItem;
 	bool needharvest;
 	bool inTransferFrom;
+	bool inTransferAll;
 
 	bool onDino;
 
@@ -41,6 +42,7 @@ struct OnlinePlayerInfo {
 		needharvest = false;
 		inTransferFrom = false;
 		onDino = false;
+		inTransferAll = false;
 
 		skipAddRemoveUpdateItems = false;
 		// mergeItemStack = false;

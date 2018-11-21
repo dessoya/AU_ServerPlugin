@@ -47,6 +47,7 @@ enum MessageTypes {
 	m_server_start,
 	m_stop_work,
 	m_player_online,					// 4
+	m_server_config_param,
 
 	m_player_create = 16,				// 
 	m_player_login,						// 17
@@ -64,6 +65,16 @@ enum MessageTypes {
 
 	m_player_harvest2,					// 29
 	m_player_update_inventory2,			// 30
+
+	m_tribe_create,						// 31
+	m_tribe_remove,						// 32
+	m_tribe_add_player,					// 33
+	m_tribe_remove_player,				// 34
+	m_tribe_set_owner,					// 35
+	m_tribe_set_admin,					// 36
+	m_tribe_remove_admin,				// 37
+	m_tribe_log,						// 38
+	m_tribe_change_name,				// 39
 };
 
 enum HarvestType {

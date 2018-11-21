@@ -106,6 +106,8 @@ UPrimalItem *Hook_UPrimalInventoryComponent_AddItem(UPrimalInventoryComponent *t
 
 	if (E_inventory_and_harvest) {
 
+		// auto c = anItem->CanCraftInInventory(this_);
+
 		_l(SN_Inventory, "");
 		_l(SN_Inventory, "[*] Inventory.AddItem ----- before -----");
 		_l(SN_Inventory, "lid %lld q %d iid %lx:%lx", lid, q, iid.ItemID1, iid.ItemID2);
@@ -260,9 +262,11 @@ void Hook_UPrimalInventoryComponent_NotifyItemQuantityUpdated(UPrimalInventoryCo
 	FString itemName("");
 	if (E_inventory_and_harvest) {
 
+		auto c = anItem->CanCraftInInventory(this_);
+
 		_l(SN_Inventory, "");
 		_l(SN_Inventory, "[*] Inventory.NotifyItemQuantityUpdated ----- before -----");
-		_l(SN_Inventory, "lid %lld q %d a %d slot %d iid %lx:%lx", lid, anItem->GetItemQuantity(), amount, anItem->SlotIndexField(), iid.ItemID1, iid.ItemID2);
+		_l(SN_Inventory, "lid %lld q %d a %d slot %d iid %lx:%lx cc %d", lid, anItem->GetItemQuantity(), amount, anItem->SlotIndexField(), iid.ItemID1, iid.ItemID2, c ? 1 : 0);
 
 		itemName = _bp(anItem);
 		_l(SN_Inventory, "%s", itemName.ToString().c_str());
@@ -312,16 +316,18 @@ void Hook_UPrimalInventoryComponent_NotifyItemQuantityUpdated(UPrimalInventoryCo
 			__formatText(info->req), amount);
 			*/
 
-		if (oi->needharvest) {
-
+		if (oi->needharvest && !oi->inTransferAll) {
+			
 			auto itemName = _bp(anItem);
 			// _msg_m_player_update_inventory(pid, info->name.ToString(), amount, 1, 0);
 			_msg_m_player_harvest2(pid, itemName.ToString(), amount, ht_hand);
 
 			if (E_inventory_and_harvest) {
 
+				auto c = anItem->CanCraftInInventory(this_);
+
 				_l(SN_Inventory, "");
-				_l(SN_Inventory, "[*] Harvest pid %lld q %d name %s", pid, amount, itemName.ToString().c_str());
+				_l(SN_Inventory, "[*] Harvest pid %lld q %d name %s cc %d", pid, amount, itemName.ToString().c_str(), c ? 1 : 0);
 				_l(SN_Inventory, "");
 			}
 		}
@@ -515,6 +521,41 @@ void Hook_AShooterPlayerController_ServerTransferFromRemoteInventory_Implementat
 	}
 }
 
+// void ServerTransferAllFromRemoteInventory_Implementation(UPrimalInventoryComponent * inventoryComp, FString * CurrentCustomFolderFilter, FString * CurrentNameFilter, FString * CurrentDestinationFolder, bool bNoFolderView) { NativeCall<void, UPrimalInventoryComponent *, FString *, FString *, FString *, bool>(this, "AShooterPlayerController.ServerTransferAllFromRemoteInventory_Implementation", inventoryComp, CurrentCustomFolderFilter, CurrentNameFilter, CurrentDestinationFolder, bNoFolderView); }
+
+DECLARE_HOOK(AShooterPlayerController_ServerTransferAllFromRemoteInventory_Implementation, void, AShooterPlayerController *,
+	UPrimalInventoryComponent * inventoryComp, FString * CurrentCustomFolderFilter, FString * CurrentNameFilter, FString * CurrentDestinationFolder,
+	bool bNoFolderView);
+
+void Hook_AShooterPlayerController_ServerTransferAllFromRemoteInventory_Implementation(AShooterPlayerController *this_,
+	UPrimalInventoryComponent * inventoryComp, FString * CurrentCustomFolderFilter, FString * CurrentNameFilter, FString * CurrentDestinationFolder,
+	bool bNoFolderView) {
+
+	if (E_inventory_and_harvest) {
+		_l(SN_Inventory, "");
+		_l(SN_Inventory, "[*] before ASPlayerCtrl.TransferAll");
+		_l(SN_Inventory, "[*] ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+	}
+
+	auto pid = this_->LinkedPlayerIDField();
+	OnlinePlayerInfo *oi = 0;
+	if (onlinePlayers && (oi = onlinePlayers->get(pid))) {
+		oi->inTransferAll = true;
+	}
+
+	AShooterPlayerController_ServerTransferAllFromRemoteInventory_Implementation_original(this_, inventoryComp, CurrentCustomFolderFilter,
+		CurrentNameFilter, CurrentDestinationFolder, bNoFolderView);
+
+	if (oi) oi->inTransferAll = false;
+
+	if (E_inventory_and_harvest) {
+		_l(SN_Inventory, "");
+		_l(SN_Inventory, "[*] after ASPlayerCtrl.TransferAll");
+		_l(SN_Inventory, "[*] ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+	}
+}
+
+
 /*
 // void DropItem(FItemNetInfo * theInfo, bool bOverrideSpawnTransform, FVector * LocationOverride, FRotator * RotationOverride, bool bPreventDropImpulse, bool bThrow, bool bSecondryAction, bool bSetItemDropLocation) { NativeCall<void, FItemNetInfo *, bool, FVector *, FRotator *, bool, bool, bool, bool>(this, "UPrimalInventoryComponent.DropItem", theInfo, bOverrideSpawnTransform, LocationOverride, RotationOverride, bPreventDropImpulse, bThrow, bSecondryAction, bSetItemDropLocation); }
 DECLARE_HOOK(UPrimalInventoryComponent_DropItem, void, UPrimalInventoryComponent *, FItemNetInfo * theInfo, bool bOverrideSpawnTransform, FVector * LocationOverride, FRotator * RotationOverride, bool bPreventDropImpulse, bool bThrow, bool bSecondryAction, bool bSetItemDropLocation);
@@ -692,6 +733,8 @@ bool M_inventory_and_harvest_init() {
 	__register_hook(UPrimalInventoryComponent, RemoveItem);
 	
 	__register_hook(AShooterPlayerController, ServerTransferFromRemoteInventory_Implementation);
+	__register_hook(AShooterPlayerController, ServerTransferAllFromRemoteInventory_Implementation);
+	
 
 	__register_hook(UPrimalInventoryComponent, ServerForceMergeItemStack_Implementation);
 	__register_hook(UPrimalInventoryComponent, ServerSplitItemStack_Implementation);
@@ -719,6 +762,7 @@ bool M_inventory_and_harvest_done() {
 	__unregister_hook(UPrimalInventoryComponent, RemoveItem);
 
 	__unregister_hook(AShooterPlayerController, ServerTransferFromRemoteInventory_Implementation);
+	__unregister_hook(AShooterPlayerController, ServerTransferAllFromRemoteInventory_Implementation);
 
 	__unregister_hook(UPrimalInventoryComponent, ServerForceMergeItemStack_Implementation);
 	__unregister_hook(UPrimalInventoryComponent, ServerSplitItemStack_Implementation);

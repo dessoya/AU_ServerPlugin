@@ -19,3 +19,4 @@ extern __time next_time;
 extern __time cur_time;
 extern int timer_interval_msecs;
 extern long long __timestamp;
+long long ___timestamp();

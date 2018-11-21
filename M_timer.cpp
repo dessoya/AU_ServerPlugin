@@ -135,6 +135,14 @@ void *timerIterators[] = {
 };
 */
 
+long long ___timestamp() {
+	const auto now = cur_time = std::chrono::system_clock::now();
+
+	{
+		using namespace std::chrono;
+		return time_point_cast<milliseconds>(now).time_since_epoch().count();
+	}
+}
 
 void __Timer() {
 	const auto now = cur_time = std::chrono::system_clock::now();

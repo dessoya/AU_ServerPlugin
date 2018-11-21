@@ -106,6 +106,7 @@
     <ClCompile Include="M_player_common_activity.cpp" />
     <ClCompile Include="M_structures.cpp" />
     <ClCompile Include="M_timer.cpp" />
+    <ClCompile Include="M_tribe.cpp" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -124,6 +125,7 @@
     <ClInclude Include="M_player_common_activity.h" />
     <ClInclude Include="M_structures.h" />
     <ClInclude Include="M_timer.h" />
+    <ClInclude Include="M_tribe.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

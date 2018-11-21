@@ -18,3 +18,11 @@ void _msg_m_player_login(ull pid, unsigned int messageType, ull sid, std::string
 void _msg_m_server_ping(unsigned int onlinePlayersCount);
 void _msg_m_player_pasive_online(ull pid, unsigned int ms);
 void _msg_m_player_set_pos_and_activity(ull pid, unsigned int ms, unsigned int activity_id, FVector *loc);
+
+void _msg_m_tribe_create(ull tid, ull pid, std::string name);
+void _msg_m_tribe_remove(ull tid);
+void _msg_m_tribe_log(ull tid, std::string message);
+void _msg_m_tribe_remove_player(ull tid, ull pid);
+void _msg_m_tribe_add_player(ull tid, ull pid);
+void _msg_m_tribe_change_name(ull tid, std::string name);
+void _msg_m_tribe_set_owner(ull tid, ull pid);

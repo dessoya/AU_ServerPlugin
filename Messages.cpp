@@ -35,6 +35,18 @@ void _msg_m_player_update_inventory2(ull pid, UPrimalItem *item, int q) {
 
 	auto name = _bp(item);
 	auto req = item->BaseCraftingResourceRequirementsField();
+	auto req2 = item->CraftingResourceRequirementsField();
+
+	/*
+	Log::GetLog()->info("inventory2 {} {} {} {} {}", req.Max(), req2.Max(),
+		item->ResourceRequirementIncreaseRatingPowerField(),
+		item->ResourceRequirementRatingIncreasePercentageField(),
+		item->ResourceRequirementRatingScaleField()
+		);
+	for (int i = 0, sz = req2.Max(); i < sz; i++) {
+		Log::GetLog()->info("req2 {}", req2[i]);
+	}
+	*/
 
 	auto reqCount = req.Max();
 
@@ -60,7 +72,7 @@ void _msg_m_player_update_inventory2(ull pid, UPrimalItem *item, int q) {
 	for (int i = 0, sz = req.Max(); i < sz; i++) {
 		auto r = req[i];
 		auto t = _bp(r.ResourceItemType.uClass);
-		auto v = r.BaseResourceRequirement * 100;
+		auto v = req2[i] * 100;
 		m->push_int((int)v);
 		eventWriter->push_string_to_message(m, t.ToString());		
 	}
@@ -244,6 +256,104 @@ void _msg_m_player_set_pos_and_activity(ull pid, unsigned int ms, unsigned int a
 
 	m->push_uint(activity_id);
 	m->push_uint(ms);
+
+	m->set_size();
+	eventWriter->push(m);
+}
+
+
+void _msg_m_tribe_create(ull tid, ull pid, std::string name) {
+
+	EventMessage *m = new EventMessage();
+	m->push_array(5);
+
+	m->push_uint(m_tribe_create);
+	m->push_uint(___timestamp());
+	m->push_uint(tid);
+	m->push_uint(pid);
+
+	m->push_string(name);
+
+	m->set_size();
+	eventWriter->push(m);
+}
+
+void _msg_m_tribe_remove(ull tid) {
+
+	EventMessage *m = new EventMessage();
+	m->push_array(3);
+
+	m->push_uint(m_tribe_remove);
+	m->push_uint(___timestamp());
+	m->push_uint(tid);
+
+	m->set_size();
+	eventWriter->push(m);
+}
+
+void _msg_m_tribe_log(ull tid, std::string message) {
+
+	EventMessage *m = new EventMessage();
+	m->push_array(4);
+
+	m->push_uint(m_tribe_log);
+	m->push_uint(___timestamp());
+	m->push_uint(tid);
+
+	m->push_string(message);
+
+	m->set_size();
+	eventWriter->push(m);
+}
+
+void _msg_m_tribe_remove_player(ull tid, ull pid) {
+
+	EventMessage *m = new EventMessage();
+	m->push_array(4);
+
+	m->push_uint(m_tribe_remove_player);
+	m->push_uint(___timestamp());
+	m->push_uint(tid);
+	m->push_uint(pid);
+
+	m->set_size();
+	eventWriter->push(m);
+}
+
+void _msg_m_tribe_add_player(ull tid, ull pid) {
+	EventMessage *m = new EventMessage();
+	m->push_array(4);
+
+	m->push_uint(m_tribe_add_player);
+	m->push_uint(___timestamp());
+	m->push_uint(tid);
+	m->push_uint(pid);
+
+	m->set_size();
+	eventWriter->push(m);
+}
+
+void _msg_m_tribe_change_name(ull tid, std::string name) {
+	EventMessage *m = new EventMessage();
+	m->push_array(4);
+
+	m->push_uint(m_tribe_change_name);
+	m->push_uint(___timestamp());
+	m->push_uint(tid);
+	m->push_string(name);
+
+	m->set_size();
+	eventWriter->push(m);
+}
+
+void _msg_m_tribe_set_owner(ull tid, ull pid) {
+	EventMessage *m = new EventMessage();
+	m->push_array(4);
+
+	m->push_uint(m_tribe_set_owner);
+	m->push_uint(___timestamp());
+	m->push_uint(tid);
+	m->push_uint(pid);
 
 	m->set_size();
 	eventWriter->push(m);

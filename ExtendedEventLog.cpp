@@ -24,29 +24,10 @@
 #include "M_player_common_activity.h"
 #include "M_structures.h"
 #include "M_inventory_and_harvest.h"
+#include "M_tribe.h"
 
 // int ForceCreateTribe(FString * TribeName, int TeamOverride) { return NativeCall<int, FString *, int>(this, "AShooterGameMode.ForceCreateTribe", TribeName, TeamOverride); }
 
-
-// unsigned __int64 AddNewTribe(AShooterPlayerState * PlayerOwner, FString * TribeName, FTribeGovernment * TribeGovernment) { return NativeCall<unsigned __int64, AShooterPlayerState *, FString *, FTribeGovernment *>(this, "AShooterGameMode.AddNewTribe", PlayerOwner, TribeName, TribeGovernment); }
-DECLARE_HOOK(AShooterGameMode_AddNewTribe, unsigned __int64, AShooterGameMode *, AShooterPlayerState * PlayerOwner, FString * TribeName, FTribeGovernment * TribeGovernment);
-unsigned __int64 Hook_AShooterGameMode_AddNewTribe(AShooterGameMode *this_, AShooterPlayerState * PlayerOwner, FString * TribeName, FTribeGovernment * TribeGovernment) {
-	auto tid = AShooterGameMode_AddNewTribe_original(this_, PlayerOwner, TribeName, TribeGovernment);
-
-	auto pid = PlayerOwner->MyPlayerDataField()->MyDataField()->PlayerDataIDField();
-
-	std::string tnameutf = ArkApi::Tools::Utf8Encode(**TribeName);
-	Log::GetLog()->info("AShooterGameMode_AddNewTribe tid {} tname {} owner_pid {}", tid, tnameutf.c_str(), pid);
-
-	return tid;
-}
-
-// void RemoveTribe(unsigned __int64 TribeID) { NativeCall<void, unsigned __int64>(this, "AShooterGameMode.RemoveTribe", TribeID); }
-DECLARE_HOOK(AShooterGameMode_RemoveTribe, void, AShooterGameMode *, unsigned __int64 TribeID);
-void Hook_AShooterGameMode_RemoveTribe(AShooterGameMode *this_, unsigned __int64 TribeID) {
-	AShooterGameMode_RemoveTribe_original(this_, TribeID);
-	Log::GetLog()->info("Hook_AShooterGameMode_RemoveTribe tid {}", TribeID);
-}
 
 void __rcon_TPDinoIdToPlayerId(RCONClientConnection* rcon_connection, RCONPacket* rcon_packet, UWorld*) {
 	FString msg = rcon_packet->Body;
@@ -228,6 +209,7 @@ ModuleHeader modulesList[] = {
 	{ "PlayerCommonActivity", M_player_common_activity_init, M_player_common_activity_done },
 	{ "Structures", M_structures_init, M_structures_done },
 	{ "InventoryAndHarvest", M_inventory_and_harvest_init, M_inventory_and_harvest_done },
+	{ "Tribe", M_tribe_init, M_tribe_done },
 
 };
 
@@ -259,7 +241,44 @@ void Load() {
 	}
 
 	modulesInited = true;
-	
+
+	AShooterGameMode *GameMode = ArkApi::GetApiUtils().GetShooterGameMode();
+	if (GameMode) {
+		struct ServerConfigParam {
+			float value;
+			const char *name;
+		};
+		ServerConfigParam params[] = {
+			{ GameMode->HarvestAmountMultiplierField(), "harvestAmount" },
+			{ GameMode->HarvestHealthMultiplierField(), "harvestHealth" },
+			{ GameMode->XPMultiplierField(), "XP" },
+			{ GameMode->TamingSpeedMultiplierField(), "tamingSpeed" },
+			{ GameMode->BabyMatureSpeedMultiplierField(), "babyMature" },
+			{ GameMode->MateBoostEffectMultiplierField(), "mateBoost" },
+			{ GameMode->MatingIntervalMultiplierField(), "matingInterval" },
+
+			{ GameMode->MatingSpeedMultiplierField(), "matingSpeed" },
+			{ GameMode->EggHatchSpeedMultiplierField(), "eggHatchSpeed" },
+			{ GameMode->LayEggIntervalMultiplierField(), "layEggInterval" },
+			{ GameMode->ResourcesRespawnPeriodMultiplierField(), "resourceRespawn" }
+		};
+
+		// GameMode->KickAllPlayersAndReload();
+		// GameMode->KickPlayerController();
+
+		auto cnt = sizeof(params) / sizeof(ServerConfigParam);
+		for (int i = 0; i < cnt; i++) {
+
+			EventMessage *m = new EventMessage();
+			m->push_array(3);
+			m->push_uint(m_server_config_param);
+			m->push_string(std::string(params[i].name));
+			m->push_float(params[i].value);
+			m->set_size();
+			eventWriter->push(m);
+
+		}
+	}	
 
 	EventMessage *m = new EventMessage();
 	m->push_array(1);
@@ -303,4 +322,4 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 		case DLL_PROCESS_DETACH: Unload(); break;
 	}
 	return TRUE;
-}
+} 
