@@ -25,6 +25,8 @@ struct OnlinePlayerInfo {
 
 	bool onDino;
 
+	APrimalDinoCharacter *lastHitDino;
+
 	// typedef std::map<unsigned long long, bool> Inventory;
 	// Inventory inventory;
 
@@ -43,6 +45,8 @@ struct OnlinePlayerInfo {
 		inTransferFrom = false;
 		onDino = false;
 		inTransferAll = false;
+
+		lastHitDino = 0;
 
 		skipAddRemoveUpdateItems = false;
 		// mergeItemStack = false;
@@ -88,6 +92,18 @@ public:
 		if (it == playerIdMap.end()) return 0;
 		return it->second;
 	}
+	OnlinePlayerInfo *getByDinoDamage(APrimalDinoCharacter *dino) {
+		auto it = playerIdMap.begin();
+		while (it != playerIdMap.end()) {
+			auto oi = it->second;
+			if (oi->lastHitDino == dino) {
+				return oi;
+			}
+			it ++;
+		}
+		return 0;
+	}
+
 	void erase(unsigned long long id);
 	void insertPlayer(AShooterPlayerController* shooter_pc, unsigned long long steamId);
 	void iterate(void *ctx, void **funcs);

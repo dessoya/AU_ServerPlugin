@@ -210,6 +210,11 @@ UPrimalItem *Hook_UPrimalInventoryComponent_AddItem(UPrimalInventoryComponent *t
 		oi->lastUpdatedItem = 0;
 	}
 
+	if (roi) {
+		roi->lastUpdatedItem = 0;
+		roi->onDino = 0;
+	}
+
 	return r;
 }
 

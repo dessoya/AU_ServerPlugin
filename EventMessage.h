@@ -75,6 +75,17 @@ enum MessageTypes {
 	m_tribe_remove_admin,				// 37
 	m_tribe_log,						// 38
 	m_tribe_change_name,				// 39
+
+	m_player_all_stats,					// 40
+	m_player_level_up,					// 41
+
+	m_dino_knockdown,					// 42
+	m_dino_wake,						// 43
+	m_dino_tame,						// 44
+	m_dino_die,							// 45
+	m_dino_level_up,					// 46
+	m_dino_spawn_wild,					// 47
+	m_dino_change_name,					// 48
 };
 
 enum HarvestType {

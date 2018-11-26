@@ -358,3 +358,284 @@ void _msg_m_tribe_set_owner(ull tid, ull pid) {
 	m->set_size();
 	eventWriter->push(m);
 }
+
+void _msg_m_player_all_stats(ull pid, UPrimalCharacterStatusComponent *s) {
+
+	auto points = s->NumberOfLevelUpPointsAppliedField();
+	auto values = s->MaxStatusValuesField();
+
+	unsigned int l = (unsigned int)points.GetSize();
+	unsigned int level = 0;
+
+	EventMessage *m = new EventMessage();
+	m->push_array(4 + l * 2);
+
+	m->push_uint(m_player_all_stats);
+	m->push_uint(__timestamp);
+	m->push_uint(pid);
+
+	for (unsigned int i = 0; i < l; i++) {
+		auto point = points()[i];
+		auto value = values()[i];
+		level += point;
+
+		m->push_uint((unsigned int)point);
+		m->push_float(value);
+	}
+
+	m->push_uint(level);
+
+	m->set_size();
+	eventWriter->push(m);
+}
+
+void _msg_m_player_level_up(ull pid, unsigned short stat_id, unsigned short points, float value) {
+
+	EventMessage *m = new EventMessage();
+	m->push_array(6);
+
+	m->push_uint(m_player_level_up);
+	m->push_uint(___timestamp());
+	m->push_uint(pid);
+
+	m->push_uint(stat_id);
+	m->push_uint(points);
+	m->push_float(value);
+
+	m->set_size();
+	eventWriter->push(m);
+
+}
+
+void _msg_m_dino_knockdown(ull pid, ull tid, APrimalDinoCharacter *dino) {
+
+	unsigned long long did = makeItemId(dino->DinoID1Field(), dino->DinoID2Field());
+
+	// auto pos = dino->Control()->DefaultActorLocationField();
+	// auto pos = dino->RootComponentField()->RelativeLocationField();
+	
+	auto name = _bp(dino);
+
+	auto s = dino->MyCharacterStatusComponentField();
+	auto points = s->NumberOfLevelUpPointsAppliedField();
+	auto values = s->MaxStatusValuesField();
+
+	unsigned int l = (unsigned int)points.GetSize();
+	unsigned int level = 0;
+	
+	EventMessage *m = new EventMessage();
+	m->push_array(10 + l * 2);
+
+	m->push_uint(m_dino_knockdown);
+	m->push_uint(___timestamp());
+	m->push_uint(did);
+	m->push_uint(pid);
+	m->push_uint(tid);
+
+	eventWriter->push_string_to_message(m, name.ToString());
+
+	auto pos = dino->RootComponentField()->RelativeLocationField();
+	m->push_float(pos.X);
+	m->push_float(pos.Y);
+	m->push_float(pos.Z);
+
+	for (unsigned int i = 0; i < l; i++) {
+		auto point = points()[i];
+		auto value = values()[i];
+		level += point;
+
+		m->push_uint((unsigned int)point);
+		m->push_float(value);
+	}
+
+	m->push_uint(level);
+
+	m->set_size();
+	eventWriter->push(m);
+}
+
+void _msg_m_dino_tame(ull pid, ull tid, APrimalDinoCharacter *dino) {
+
+	unsigned long long did = makeItemId(dino->DinoID1Field(), dino->DinoID2Field());
+
+	auto s = dino->MyCharacterStatusComponentField();
+	auto points = s->NumberOfLevelUpPointsAppliedField();
+	auto values = s->MaxStatusValuesField();
+
+	unsigned int l = (unsigned int)points.GetSize();
+	unsigned int level = 0;
+
+	EventMessage *m = new EventMessage();
+	m->push_array(6 + l * 2);
+
+	m->push_uint(m_dino_tame);
+	m->push_uint(___timestamp());
+	m->push_uint(did);
+	m->push_uint(pid);
+	m->push_uint(tid);
+
+	for (unsigned int i = 0; i < l; i++) {
+		auto point = points()[i];
+		auto value = values()[i];
+		level += point;
+
+		m->push_uint((unsigned int)point);
+		m->push_float(value);
+	}
+
+	m->push_uint(level);
+
+	m->set_size();
+	eventWriter->push(m);
+}
+
+void _msg_m_dino_wake(APrimalDinoCharacter *dino) {
+
+	unsigned long long did = makeItemId(dino->DinoID1Field(), dino->DinoID2Field());
+
+	EventMessage *m = new EventMessage();
+	m->push_array(3);
+
+	m->push_uint(m_dino_wake);
+	m->push_uint(___timestamp());
+	m->push_uint(did);
+
+	m->set_size();
+	eventWriter->push(m);
+}
+
+void _msg_m_dino_die(APrimalDinoCharacter *dino) {
+
+	unsigned long long did = makeItemId(dino->DinoID1Field(), dino->DinoID2Field());
+
+	EventMessage *m = new EventMessage();
+	m->push_array(3);
+
+	m->push_uint(m_dino_die);
+	m->push_uint(___timestamp());
+	m->push_uint(did);
+
+	m->set_size();
+	eventWriter->push(m);
+}
+
+void _msg_m_dino_level_up(APrimalDinoCharacter *dino, ull pid, unsigned short stat_id) {
+
+	unsigned long long did = makeItemId(dino->DinoID1Field(), dino->DinoID2Field());
+
+	EventMessage *m = new EventMessage();
+	m->push_array(7);
+
+	m->push_uint(m_dino_level_up);
+	m->push_uint(___timestamp());
+	m->push_uint(did);
+	ull tid = dino->TargetingTeamField();
+	m->push_uint(tid);
+	m->push_uint(pid);
+
+	m->push_uint(stat_id);
+	auto s = dino->MyCharacterStatusComponentField();
+	auto c = s->MaxStatusValuesField();
+	auto v = c()[stat_id];
+	m->push_float(v);
+
+	m->set_size();
+	eventWriter->push(m);
+}
+
+void _msg_m_dino_spawn_wild(APrimalDinoCharacter *dino) {
+
+	unsigned long long did = makeItemId(dino->DinoID1Field(), dino->DinoID2Field());
+
+	auto s = dino->MyCharacterStatusComponentField();
+	auto points = s->NumberOfLevelUpPointsAppliedField();
+	auto values = s->MaxStatusValuesField();
+
+	unsigned int l = (unsigned int)points.GetSize();
+	unsigned int level = 0;
+
+	EventMessage *m = new EventMessage();
+	m->push_array(8 + l * 2);
+
+	m->push_uint(m_dino_spawn_wild);
+	m->push_uint(___timestamp());
+	m->push_uint(did);
+	auto name = _bp(dino);
+	eventWriter->push_string_to_message(m, name.ToString());
+
+	auto pos = dino->RootComponentField()->RelativeLocationField();
+	m->push_float(pos.X);
+	m->push_float(pos.Y);
+	m->push_float(pos.Z);
+
+	for (unsigned int i = 0; i < l; i++) {
+		auto point = points()[i];
+		auto value = values()[i];
+		level += point;
+
+		m->push_uint((unsigned int)point);
+		m->push_float(value);
+	}
+
+	m->push_uint(level);
+
+	m->set_size();
+	eventWriter->push(m);
+}
+
+void _msg_m_dino_change_name(APrimalDinoCharacter *dino, std::string newName) {
+
+	unsigned long long did = makeItemId(dino->DinoID1Field(), dino->DinoID2Field());
+
+	EventMessage *m = new EventMessage();
+	m->push_array(4);
+
+	m->push_uint(m_dino_change_name);
+	m->push_uint(___timestamp());
+	m->push_uint(did);
+	m->push_string(newName);
+
+	m->set_size();
+	eventWriter->push(m);
+}
+
+void _msg_server_config() {
+
+	AShooterGameMode *GameMode = ArkApi::GetApiUtils().GetShooterGameMode();
+	if (GameMode) {
+		struct ServerConfigParam {
+			float value;
+			const char *name;
+		};
+		ServerConfigParam params[] = {
+			{ GameMode->HarvestAmountMultiplierField(), "harvestAmount" },
+			{ GameMode->HarvestHealthMultiplierField(), "harvestHealth" },
+			{ GameMode->XPMultiplierField(), "XP" },
+			{ GameMode->TamingSpeedMultiplierField(), "tamingSpeed" },
+			{ GameMode->BabyMatureSpeedMultiplierField(), "babyMature" },
+			{ GameMode->MateBoostEffectMultiplierField(), "mateBoost" },
+			{ GameMode->MatingIntervalMultiplierField(), "matingInterval" },
+
+			{ GameMode->MatingSpeedMultiplierField(), "matingSpeed" },
+			{ GameMode->EggHatchSpeedMultiplierField(), "eggHatchSpeed" },
+			{ GameMode->LayEggIntervalMultiplierField(), "layEggInterval" },
+			{ GameMode->ResourcesRespawnPeriodMultiplierField(), "resourceRespawn" }
+		};
+
+		// GameMode->KickAllPlayersAndReload();
+		// GameMode->KickPlayerController();
+
+		auto cnt = sizeof(params) / sizeof(ServerConfigParam);
+		for (int i = 0; i < cnt; i++) {
+
+			EventMessage *m = new EventMessage();
+			m->push_array(3);
+			m->push_uint(m_server_config_param);
+			m->push_string(std::string(params[i].name));
+			m->push_float(params[i].value);
+			m->set_size();
+			eventWriter->push(m);
+
+		}
+	}
+}

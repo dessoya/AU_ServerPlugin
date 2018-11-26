@@ -16,7 +16,12 @@ enum ObjectTypes {
 	ot_APrimalDinoCharacter,
 	ot_APrimalStructureItemContainer,
 	ot_APrimalCharacter,
-	ot_ACharacter
+	ot_ACharacter,
+	ot_AController	= 20,
+	ot_APlayerController = 30,
+	ot_AShooterPlayerController = 40,
+	ot_APrimalDinoAIController = 50,
+	ot_AAIController = 60
 };
 
 ItemInfo *makeItemInfo(UPrimalItem *item);

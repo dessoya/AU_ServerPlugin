@@ -25,6 +25,7 @@ std::string __formatText(FString s) {
 FString _c("_C");
 FString _e("");
 FString _child("_Child_C"); // mod stacks
+const FString __bp("_BP");
 
 FString _bp(UObjectBase* object) {
 	if (!object) return _e;
@@ -41,19 +42,32 @@ FString _bp(UClass *cf) {
 
 	FString path_name("");
 
-	cf->GetDefaultObject(true)->GetFullName(&path_name, nullptr);
-	if (int find_index = 0; path_name.FindChar(' ', find_index)) {
+	if (cf) {
+		cf->GetDefaultObject(true)->GetFullName(&path_name, nullptr);
+		if (int find_index = 0; path_name.FindChar(' ', find_index)) {
 
-		if (path_name.Mid(find_index - 8, 8) == _child) {
-			path_name = path_name.Mid(0, find_index - 8);
-		}
-		else if (path_name.Mid(find_index - 2, 2) == _c) {
-			path_name = path_name.Mid(0, find_index - 2);
-		}
-		else {
-			path_name = path_name.Mid(0, find_index);
-		}
+			if (path_name.Mid(find_index - 8, 8) == _child) {
+				path_name = path_name.Mid(0, find_index - 8);
+			}
+			else if (path_name.Mid(find_index - 2, 2) == _c) {
+				path_name = path_name.Mid(0, find_index - 2);
+			}
+			else {
+				path_name = path_name.Mid(0, find_index);
+			}
 
+			auto bp = path_name.Find(__bp);
+			if (bp != -1) {
+				// check for end
+				if (bp + __bp.Len() == path_name.Len()) {
+					path_name = path_name.Mid(0, bp);					 
+				}
+				else {
+					path_name = path_name.Mid(0, bp) + path_name.Mid(bp + __bp.Len());
+				}
+			}
+
+		}
 	}
 	return path_name;
 }
@@ -111,6 +125,26 @@ ObjectTypes __getClassType(AActor *o) {
 		return ot_ACharacter;
 	}
 
+
+	if (o->IsA(APrimalDinoAIController::GetPrivateStaticClass())) {
+		return ot_APrimalDinoAIController;
+	}
+
+	if (o->IsA(AAIController::GetPrivateStaticClass())) {
+		return ot_AAIController;
+	}
+
+	if (o->IsA(AShooterPlayerController::GetPrivateStaticClass())) {
+		return ot_AShooterPlayerController;
+	}
+
+	if (o->IsA(APlayerController::GetPrivateStaticClass())) {
+		return ot_APlayerController;
+	}
+
+	if (o->IsA(AController::GetPrivateStaticClass())) {
+		return ot_AController;
+	}
 
 
 	return ot_unknown;

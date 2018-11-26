@@ -242,49 +242,14 @@ void Load() {
 
 	modulesInited = true;
 
-	AShooterGameMode *GameMode = ArkApi::GetApiUtils().GetShooterGameMode();
-	if (GameMode) {
-		struct ServerConfigParam {
-			float value;
-			const char *name;
-		};
-		ServerConfigParam params[] = {
-			{ GameMode->HarvestAmountMultiplierField(), "harvestAmount" },
-			{ GameMode->HarvestHealthMultiplierField(), "harvestHealth" },
-			{ GameMode->XPMultiplierField(), "XP" },
-			{ GameMode->TamingSpeedMultiplierField(), "tamingSpeed" },
-			{ GameMode->BabyMatureSpeedMultiplierField(), "babyMature" },
-			{ GameMode->MateBoostEffectMultiplierField(), "mateBoost" },
-			{ GameMode->MatingIntervalMultiplierField(), "matingInterval" },
-
-			{ GameMode->MatingSpeedMultiplierField(), "matingSpeed" },
-			{ GameMode->EggHatchSpeedMultiplierField(), "eggHatchSpeed" },
-			{ GameMode->LayEggIntervalMultiplierField(), "layEggInterval" },
-			{ GameMode->ResourcesRespawnPeriodMultiplierField(), "resourceRespawn" }
-		};
-
-		// GameMode->KickAllPlayersAndReload();
-		// GameMode->KickPlayerController();
-
-		auto cnt = sizeof(params) / sizeof(ServerConfigParam);
-		for (int i = 0; i < cnt; i++) {
-
-			EventMessage *m = new EventMessage();
-			m->push_array(3);
-			m->push_uint(m_server_config_param);
-			m->push_string(std::string(params[i].name));
-			m->push_float(params[i].value);
-			m->set_size();
-			eventWriter->push(m);
-
-		}
-	}	
-
 	EventMessage *m = new EventMessage();
 	m->push_array(1);
 	m->push_uint(m_server_start);
 	m->set_size();
 	eventWriter->push(m);
+
+	_msg_server_config();
+
 	{
 		auto it = onlinePlayers->playerIdMap.begin();
 		while (it != onlinePlayers->playerIdMap.end()) {

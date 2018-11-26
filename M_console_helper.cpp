@@ -5,6 +5,7 @@
 #include "M_timer.h"
 #include "M_config_reader.h"
 #include "processthreadsapi.h"
+#include "Messages.h"
 
 class MyCH : public ConsoleHelper {
 
@@ -114,6 +115,7 @@ void __Timer2() {
 		auto e = ConsoleHelper::instance->getElement("loading");
 		ConsoleHelper::instance->delElement(e);
 		installControls();
+		_msg_server_config();
 	}
 
 	auto ctrlC = (CtrlC *)ConsoleHelper::_getElement("ctrlc");
@@ -137,6 +139,8 @@ void Hook_UWorld_InitWorld(UWorld *w, DWORD64 p) {
 	if (ConsoleHelper::instance) {
 		ConsoleHelper::instance->clear();
 	}
+
+	_msg_server_config();
 }
 
 

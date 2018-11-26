@@ -74,8 +74,25 @@ void Hook_AShooterGameMode_Logout(AShooterGameMode* _this, AController* Exiting)
 	AShooterGameMode_Logout_original(_this, Exiting);
 }
 
-DECLARE_HOOK(AShooterGameMode_StartNewShooterPlayer, void, AShooterGameMode *, APlayerController *, bool, bool, FPrimalPlayerCharacterConfigStruct *, UPrimalPlayerData *);
 
+
+DECLARE_HOOK(AShooterCharacter_BeginPlay, void, AShooterCharacter *);
+void Hook_AShooterCharacter_BeginPlay(AShooterCharacter* this_) {
+
+	AShooterCharacter_BeginPlay_original(this_);
+	
+
+	auto c = this_->GetSpawnedForController();
+	if (c) {
+		unsigned long long pid = c->LinkedPlayerIDField();
+		if (pid) {
+			_msg_m_player_all_stats(pid, this_->MyCharacterStatusComponentField());
+		}
+	}
+
+}
+
+DECLARE_HOOK(AShooterGameMode_StartNewShooterPlayer, void, AShooterGameMode *, APlayerController *, bool, bool, FPrimalPlayerCharacterConfigStruct *, UPrimalPlayerData *);
 void Hook_AShooterGameMode_StartNewShooterPlayer(AShooterGameMode* _this, APlayerController* new_player,
 	bool force_create_new_player_data, bool is_from_login, FPrimalPlayerCharacterConfigStruct* char_config,
 	UPrimalPlayerData* ark_player_data) {
@@ -118,6 +135,11 @@ void Hook_AShooterGameMode_StartNewShooterPlayer(AShooterGameMode* _this, APlaye
 			FVector pos = player->DefaultActorLocationField();
 
 			_msg_m_player_set_pos(id, &pos);
+
+			auto ch = player->GetPlayerCharacter();
+			if (ch) {
+				_msg_m_player_all_stats(id, ch->MyCharacterStatusComponentField());
+			}
 		}
 	}
 }
@@ -127,6 +149,8 @@ bool M_player_common_activity_init() {
 	__register_hook(AShooterCharacter, Die);
 	__register_hook(AShooterGameMode, StartNewShooterPlayer);
 	__register_hook(AShooterGameMode, Logout);
+	__register_hook(AShooterCharacter,BeginPlay);
+	
 	return true;
 }
 
@@ -134,5 +158,6 @@ bool M_player_common_activity_done() {
 	__unregister_hook(AShooterCharacter, Die);
 	__unregister_hook(AShooterGameMode, StartNewShooterPlayer);
 	__unregister_hook(AShooterGameMode, Logout);
+	__unregister_hook(AShooterCharacter, BeginPlay);
 	return true;
 }

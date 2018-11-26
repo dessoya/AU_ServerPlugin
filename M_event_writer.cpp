@@ -385,7 +385,7 @@ DWORD EventWriter::thread() {
 			}
 		}
 
-		Sleep(10);
+		Sleep(250);
 	}
 
 error_exit:

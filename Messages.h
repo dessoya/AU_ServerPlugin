@@ -26,3 +26,16 @@ void _msg_m_tribe_remove_player(ull tid, ull pid);
 void _msg_m_tribe_add_player(ull tid, ull pid);
 void _msg_m_tribe_change_name(ull tid, std::string name);
 void _msg_m_tribe_set_owner(ull tid, ull pid);
+
+void _msg_m_player_all_stats(ull pid, UPrimalCharacterStatusComponent *s);
+void _msg_m_player_level_up(ull pid, unsigned short stat_id, unsigned short points, float value);
+
+void _msg_m_dino_knockdown(ull pid, ull tid, APrimalDinoCharacter *dino);
+void _msg_m_dino_tame(ull pid, ull tid, APrimalDinoCharacter *dino);
+void _msg_m_dino_wake(APrimalDinoCharacter *dino);
+void _msg_m_dino_die(APrimalDinoCharacter *dino);
+void _msg_m_dino_level_up(APrimalDinoCharacter *dino, ull pid, unsigned short stat_id);
+void _msg_m_dino_spawn_wild(APrimalDinoCharacter *dino);
+void _msg_m_dino_change_name(APrimalDinoCharacter *dino, std::string newName);
+
+void _msg_server_config();
