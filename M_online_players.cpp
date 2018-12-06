@@ -51,7 +51,7 @@ OnlinePlayers::OnlinePlayers() {
 			auto tidsarr = tids.Array();
 			for (int i = 0, m = tidsarr.Max(); i < m; i++) {
 				auto tid = tidsarr[i];
-				Log::GetLog()->info("[*] enum tribe id {}", tid);
+				// Log::GetLog()->info("[*] enum tribe id {}", tid);
 
 				
 				// FTribeData td;
@@ -64,7 +64,7 @@ OnlinePlayers::OnlinePlayers() {
 
 				// if (mode->GetOrLoadTribeData(tid, &td)) {
 					// td.b
-					Log::GetLog()->info("[*] enum tribe name {}", tribe_data->TribeNameField().ToString());
+					// Log::GetLog()->info("[*] enum tribe name {}", tribe_data->TribeNameField().ToString());
 					/*
 					auto td2 = mode->GetTribeData(&td, tid);
 					if (td2) {
@@ -227,6 +227,36 @@ void OnlinePlayers::_t_collect_online_and_position(TimerContext *tctx) {
 
 			_msg_m_player_set_pos_and_activity(info->id, ms, activity_id, &pos);
 
+		}
+
+		auto character = info->shooterPlayer->CharacterField();		
+		if (character) {
+			auto ct = __getClassType(character);
+			// Log::GetLog()->info("[*] player got character {}", ct);
+			if(ct == ot_APrimalDinoCharacter) {
+				// Log::GetLog()->info("[*] player riding");
+				auto rd = static_cast<APrimalDinoCharacter *>(character);
+				auto dragged = rd->CarriedCharacterField().Get();
+				if (dragged) {
+					// Log::GetLog()->info("[*] riding dino drag");
+					auto dt = __getClassType(dragged);
+					if (dt == ot_APrimalDinoCharacter) {
+						auto dino_ = static_cast<APrimalDinoCharacter *>(dragged);
+						auto dinoName = _bp(dino_);
+						// Log::GetLog()->info("[*] dragged dino {}", _bp(dino_).ToString());
+						if (!dino_->IsCurrentlyPlayingAttackAnimation()) {
+							if (dinoName.ToString() == "Ankylo_Character") {
+								// dino_->bDisableHarvesting().Get()
+								dino_->bTamedWanderHarvest().Set(true);
+								dino_->DoAttack(0, true, true);
+							}
+							else {
+								dino_->DoAttack(0, true, true);
+							}
+						}
+					}
+				}
+			}
 		}
 
 		/*

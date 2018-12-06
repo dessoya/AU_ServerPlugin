@@ -63,6 +63,7 @@ UPrimalItem *Hook_UPrimalInventoryComponent_AddItem(UPrimalInventoryComponent *t
 
 	if (ownerClassType == ot_AShooterCharacter) {
 		_player = static_cast<AShooterCharacter *>(owner_);
+		
 		_pid = _player->LinkedPlayerDataIDField();
 		oi = onlinePlayers->get(_pid);		
 	}

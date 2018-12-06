@@ -324,7 +324,25 @@ int Hook_APrimalDinoCharacter_GetRandomBaseLevel(APrimalDinoCharacter *this_) {
 
 	r = rand();
 	if (r < 0) r *= -1;
-	r = r % 145;
+	int total_ = 151 + 60 + 7;
+	r = r % total_ ;
+
+	if (r < 48) {
+		r /= 3;
+	}
+	else if (r >= total_ - (47 + 7)) {
+		
+		r -= (total_ - (47 + 7));
+		r /= 3;
+		r += 130;
+		if (r > 145) r = 145;
+
+	}
+	else {
+		r -= 47;
+		r += 15;
+	}
+
 	r += 5;
 
 	// Log::GetLog()->info("[*] APrimalDinoCharacter_GetRandomBaseLevel after {}", r);

@@ -7,7 +7,7 @@
 
 __time cur_time, next_time, last_treat_timer;
 bool firstTime;
-int timer_interval_msecs = 3500;
+int timer_interval_msecs = 100; 
 long long __timestamp = 0;
 
 void __Timer();
