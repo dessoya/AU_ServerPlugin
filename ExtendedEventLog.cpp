@@ -5,6 +5,8 @@
 #include <map>
 #include <fstream>
 
+#include "hdr/sqlite_modern_cpp.h"
+
 #pragma comment(lib, "ArkApi.lib")
 
 #include "EventMessage.h"

@@ -7,6 +7,48 @@
 /*
 Fatal error!
 
+---------------------------
+The UE4-ShooterGame Server has crashed and will close
+---------------------------
+Fatal error!
+
+
+
+VERSION: 287.124
+ShooterGameServer.exe!FMallocBinned::Realloc() (0x00007ff78e5223b3) + 0 bytes [f:\build\trunk\engine\source\runtime\core\public\hal\mallocbinned.h:1026]
+ShooterGameServer.exe!FHeapAllocator::ForAnyElementType::ResizeAllocation() (0x00007ff78d750455) + 43 bytes [f:\build\trunk\engine\source\runtime\core\public\containers\containerallocationpolicies.h:347]
+ShooterGameServer.exe!UPrimalInventoryComponent::AddCustomFolder() (0x00007ff78d938e69) + 68 bytes [f:\build\trunk\projects\shootergame\source\shootergame\private\primalinventorycomponent.cpp:5393]
+ExtendedEventLog.dll!Hook_UPrimalInventoryComponent_AddCustomFolder() (0x00007ffbd2db697f) + 90 bytes [d:\zh\arkupgrade_\au_serverplugin\m_tribe.cpp:306]
+ExtendedEventLog.dll!UPrimalInventoryComponent::AddCustomFolder() (0x00007ffbd2db5cf4) + 180 bytes [d:\zh\ark-server-api_2_8\version\core\public\api\ark\inventory.h:478]
+ExtendedEventLog.dll!Hook_UPrimalInventoryComponent_ServerViewRemoteInventory() (0x00007ffbd2db6c48) + 25 bytes [d:\zh\arkupgrade_\au_serverplugin\m_tribe.cpp:340]
+ShooterGameServer.exe!AShooterPlayerController::execServerActorViewRemoteInventory() (0x00007ff78e19d880) + 192 bytes [f:\build\trunk\projects\shootergame\source\shootergame\classes\shooterplayercontroller.h:113]
+ShooterGameServer.exe!UFunction::Invoke() (0x00007ff78e56102f) + 6 bytes [f:\build\trunk\engine\source\runtime\coreuobject\private\uobject\class.cpp:3801]
+ShooterGameServer.exe!UObject::ProcessEvent() (0x00007ff78e5a1adc) + 0 bytes [f:\build\trunk\engine\source\runtime\coreuobject\private\uobject\scriptcore.cpp:931]
+ShooterGameServer.exe!AActor::ProcessEvent() (0x00007ff78ea0f422) + 0 bytes [f:\build\trunk\engine\source\runtime\engine\private\actor.cpp:627]
+ShooterGameServer.exe!FObjectReplicator::ReceivedBunch_WrappedNet() (0x00007ff78eaa779d) + 0 bytes [f:\build\trunk\engine\source\runtime\engine\private\datareplication.cpp:989]
+ShooterGameServer.exe!UActorChannel::ProcessBunch() (0x00007ff78ea9cd12) + 0 bytes [f:\build\trunk\engine\source\runtime\engine\private\datachannel.cpp:1763]
+ShooterGameServer.exe!UChannel::ReceivedNextBunch() (0x00007ff78ea994c8) + 21 bytes [f:\build\trunk\engine\source\runtime\engine\private\datachannel.cpp:533]
+ShooterGameServer.exe!UChannel::ReceivedRawBunch() (0x00007ff78ea9908b) + 0 bytes [f:\build\trunk\engine\source\runtime\engine\private\datachannel.cpp:330]
+ShooterGameServer.exe!UNetConnection::ReceivedPacket() (0x00007ff78eba1ffd) + 0 bytes [f:\build\trunk\engine\source\runtime\engine\private\netconnection.cpp:1164]
+ShooterGameServer.exe!UNetConnection::ReceivedRawPacket() (0x00007ff78eba0ec3) + 0 bytes [f:\build\trunk\engine\source\runtime\engine\private\netconnection.cpp:621]
+ShooterGameServer.exe!UIpNetDriver::TickDispatch() (0x00007ff78e9d91b4) + 24 bytes [f:\build\trunk\engine\source\runtime\online\onlinesubsystemutils\private\ipnetdriver.cpp:454]
+ShooterGameServer.exe!TBaseUObjectMethodDelegateInstance_OneParam<APrimalCharacter,void,float>::ExecuteIfSafe() (0x00007ff78d8614f7) + 0 bytes [f:\build\trunk\engine\source\runtime\core\public\delegates\delegateinstancesimpl.inl:533]
+ShooterGameServer.exe!TBaseMulticastDelegate_OneParam<void,float>::Broadcast() (0x00007ff78eb84a49) + 14 bytes [f:\build\trunk\engine\source\runtime\core\public\delegates\delegatesignatureimpl.inl:1837]
+ShooterGameServer.exe!UWorld::Tick() (0x00007ff78eb7ce83) + 0 bytes [f:\build\trunk\engine\source\runtime\engine\private\leveltick.cpp:1095]
+ShooterGameServer.exe!UGameEngine::Tick() (0x00007ff78eade61f) + 0 bytes [f:\build\trunk\engine\source\runtime\engine\private\gameengine.cpp:1170]
+ShooterGameServer.exe!FEngineLoop::Tick() (0x00007ff78d74c39c) + 0 bytes [f:\build\trunk\engine\source\runtime\launch\private\launchengineloop.cpp:2421]
+ShooterGameServer.exe!GuardedMain() (0x00007ff78d747d0c) + 0 bytes [f:\build\trunk\engine\source\runtime\launch\private\launch.cpp:140]
+ShooterGameServer.exe!GuardedMainWrapper() (0x00007ff78d74d3ea) + 5 bytes [f:\build\trunk\engine\source\runtime\launch\private\windows\launchwindows.cpp:125]
+ShooterGameServer.exe!WinMain() (0x00007ff78d74d520) + 8 bytes [f:\build\trunk\engine\source\runtime\launch\private\windows\launchwindows.cpp:209]
+ShooterGameServer.exe!__tmainCRTStartup() (0x00007ff78fae94a1) + 21 bytes [f:\dd\vctools\crt\crtw32\dllstuff\crtexe.c:618]
+KERNEL32.DLL!UnknownFunction (0x00007ffc03b03034) + 0 bytes [UnknownFile:0]
+ntdll.dll!UnknownFunction (0x00007ffc05ef1471) + 0 bytes [UnknownFile:0]
+ntdll.dll!UnknownFunction (0x00007ffc05ef1471) + 0 bytes [UnknownFile:0]
+
+---------------------------
+ÎÊ
+---------------------------
+
 
 
 VERSION: 287.100
@@ -90,12 +132,15 @@ void dump_stats(UPrimalCharacterStatusComponent *s) {
 	{
 		Log::GetLog()->info("[!] NumberOfLevelUpPointsAppliedField");
 		auto c = s->NumberOfLevelUpPointsAppliedField();
+		auto c2 = s->MaxStatusValuesField();
 		for (int i = 0; i < c.GetSize(); i++) {
 			auto item = c()[i];
-			Log::GetLog()->info("{}", (int)item);
+			auto item2 = c2()[i];
+			Log::GetLog()->info("{} {}", (int)item, item2);
 		}
 	}
 	// tame pts
+	/*
 	{
 		Log::GetLog()->info("[!] NumberOfLevelUpPointsAppliedTamedField");
 		auto c = s->NumberOfLevelUpPointsAppliedTamedField();
@@ -104,6 +149,7 @@ void dump_stats(UPrimalCharacterStatusComponent *s) {
 			Log::GetLog()->info("{}", (int)item);
 		}
 	}
+	*/
 	/*
 	{
 		Log::GetLog()->info("[!] BaseLevelMaxStatusValuesField");
@@ -115,6 +161,8 @@ void dump_stats(UPrimalCharacterStatusComponent *s) {
 	}
 	*/
 	// max value of stat
+
+	/*
 	{
 		Log::GetLog()->info("[!] MaxStatusValuesField");
 		auto c = s->MaxStatusValuesField();
@@ -123,7 +171,11 @@ void dump_stats(UPrimalCharacterStatusComponent *s) {
 			Log::GetLog()->info("{}", item);
 		}
 	}
+	*/
+
+
 	// current value of stat
+	/*
 	{
 		Log::GetLog()->info("[!] CurrentStatusValuesField");
 		auto c = s->CurrentStatusValuesField();
@@ -132,6 +184,7 @@ void dump_stats(UPrimalCharacterStatusComponent *s) {
 			Log::GetLog()->info("{}", item);
 		}
 	}
+	*/
 	/*
 	{
 		Log::GetLog()->info("[!] AdditionalStatusValuesField");
@@ -263,17 +316,228 @@ int Hook_APrimalCharacter_LevelUpPlayerAddedStat(APrimalCharacter *this_, TEnumA
 }
 
 
+
+/*
+	Health = 0x0,
+	Stamina = 0x1,
+	Torpidity = 0x2,
+	Oxygen = 0x3,
+	Food = 0x4,
+	Water = 0x5,
+	Temperature = 0x6,
+	Weight = 0x7,
+	MeleeDamageMultiplier = 0x8,
+	SpeedMultiplier = 0x9,
+	TemperatureFortitude = 0xA,
+	CraftingSpeedMultiplier = 0xB,
+
+Fatal error!
+
+
+
+LowLevelFatalError [File:F:\build\Trunk\Engine\Source\Runtime\Core\Private\GenericPlatform\GenericPlatformMemory.cpp] [Line: 51]
+Ran out of memory allocating 18446744040809734144 bytes with alignment 0
+
+
+VERSION: 287.124
+KERNELBASE.dll!UnknownFunction (0x00007ff974d6a388) + 0 bytes [UnknownFile:0]
+ShooterGameServer.exe!FError::LowLevelFatal() (0x00007ff6e587943a) + 0 bytes [f:\build\trunk\engine\source\runtime\core\private\misc\outputdevice.cpp:354]
+ShooterGameServer.exe!FMallocBinned::Malloc() (0x00007ff6e58a208e) + 0 bytes [f:\build\trunk\engine\source\runtime\core\public\hal\mallocbinned.h:984]
+ExtendedEventLog.dll!FMemory::Realloc() (0x00007ff961624128) + 88 bytes [d:\zh\ark-server-api_2_8\version\core\public\api\ue\hal\unrealmemory.h:106]
+ExtendedEventLog.dll!TArray<FString,FDefaultAllocator>::ResizeForCopy() (0x00007ff96164c7e3) + 15 bytes [d:\zh\ark-server-api_2_8\version\core\public\api\ue\containers\tarray.h:2067]
+ExtendedEventLog.dll!Hook_UPrimalInventoryComponent_AddCustomFolder() (0x00007ff9616468e6) + 50 bytes [d:\zh\arkupgrade_\au_serverplugin\m_tribe.cpp:383]
+ShooterGameServer.exe!AShooterPlayerController::ServerNotifyEditText_Implementation() (0x00007ff6e4f365ed) + 0 bytes [f:\build\trunk\projects\shootergame\source\shootergame\private\shooterplayercontroller.cpp:7045]
+ShooterGameServer.exe!AShooterPlayerController::execServerNotifyEditText() (0x00007ff6e551b1be) + 862 bytes [f:\build\trunk\projects\shootergame\source\shootergame\classes\shooterplayercontroller.h:113]
+ShooterGameServer.exe!UFunction::Invoke() (0x00007ff6e58e102f) + 6 bytes [f:\build\trunk\engine\source\runtime\coreuobject\private\uobject\class.cpp:3801]
+ShooterGameServer.exe!UObject::ProcessEvent() (0x00007ff6e5921adc) + 0 bytes [f:\build\trunk\engine\source\runtime\coreuobject\private\uobject\scriptcore.cpp:931]
+ShooterGameServer.exe!AActor::ProcessEvent() (0x00007ff6e5d8f422) + 0 bytes [f:\build\trunk\engine\source\runtime\engine\private\actor.cpp:627]
+ShooterGameServer.exe!FObjectReplicator::ReceivedBunch_WrappedNet() (0x00007ff6e5e2779d) + 0 bytes [f:\build\trunk\engine\source\runtime\engine\private\datareplication.cpp:989]
+ShooterGameServer.exe!UActorChannel::ProcessBunch() (0x00007ff6e5e1cd12) + 0 bytes [f:\build\trunk\engine\source\runtime\engine\private\datachannel.cpp:1763]
+ShooterGameServer.exe!UChannel::ReceivedNextBunch() (0x00007ff6e5e194c8) + 21 bytes [f:\build\trunk\engine\source\runtime\engine\private\datachannel.cpp:533]
+ShooterGameServer.exe!UChannel::ReceivedRawBunch() (0x00007ff6e5e1908b) + 0 bytes [f:\build\trunk\engine\source\runtime\engine\private\datachannel.cpp:330]
+ShooterGameServer.exe!UNetConnection::ReceivedPacket() (0x00007ff6e5f21ffd) + 0 bytes [f:\build\trunk\engine\source\runtime\engine\private\netconnection.cpp:1164]
+ShooterGameServer.exe!UNetConnection::ReceivedRawPacket() (0x00007ff6e5f20ec3) + 0 bytes [f:\build\trunk\engine\source\runtime\engine\private\netconnection.cpp:621]
+ShooterGameServer.exe!UIpNetDriver::TickDispatch() (0x00007ff6e5d591b4) + 24 bytes [f:\build\trunk\engine\source\runtime\online\onlinesubsystemutils\private\ipnetdriver.cpp:454]
+ShooterGameServer.exe!TBaseUObjectMethodDelegateInstance_OneParam<APrimalCharacter,void,float>::ExecuteIfSafe() (0x00007ff6e4be14f7) + 0 bytes [f:\build\trunk\engine\source\runtime\core\public\delegates\delegateinstancesimpl.inl:533]
+ShooterGameServer.exe!TBaseMulticastDelegate_OneParam<void,float>::Broadcast() (0x00007ff6e5f04a49) + 14 bytes [f:\build\trunk\engine\source\runtime\core\public\delegates\delegatesignatureimpl.inl:1837]
+ShooterGameServer.exe!UWorld::Tick() (0x00007ff6e5efce83) + 0 bytes [f:\build\trunk\engine\source\runtime\engine\private\leveltick.cpp:1095]
+ShooterGameServer.exe!UGameEngine::Tick() (0x00007ff6e5e5e61f) + 0 bytes [f:\build\trunk\engine\source\runtime\engine\private\gameengine.cpp:1170]
+ShooterGameServer.exe!FEngineLoop::Tick() (0x00007ff6e4acc39c) + 0 bytes [f:\build\trunk\engine\source\runtime\launch\private\launchengineloop.cpp:2421]
+ShooterGameServer.exe!GuardedMain() (0x00007ff6e4ac7d0c) + 0 bytes [f:\build\trunk\engine\source\runtime\launch\private\launch.cpp:140]
+ShooterGameServer.exe!GuardedMainWrapper() (0x00007ff6e4acd3ea) + 5 bytes [f:\build\trunk\engine\source\runtime\launch\private\windows\launchwindows.cpp:125]
+ShooterGameServer.exe!WinMain() (0x00007ff6e4acd520) + 8 bytes [f:\build\trunk\engine\source\runtime\launch\private\windows\launchwindows.cpp:209]
+ShooterGameServer.exe!__tmainCRTStartup() (0x00007ff6e6e694a1) + 21 bytes [f:\dd\vctools\crt\crtw32\dllstuff\crtexe.c:618]
+KERNEL32.DLL!UnknownFunction (0x00007ff977993034) + 0 bytes [UnknownFile:0]
+ntdll.dll!UnknownFunction (0x00007ff9789d1471) + 0 bytes [UnknownFile:0]
+ntdll.dll!UnknownFunction (0x00007ff9789d1471) + 0 bytes [UnknownFile:0]
+
+
+*/
+
+// TArray<FString> * GetCustomFolders(TArray<FString> * result, int InventoryCompType) { return NativeCall<TArray<FString> *, TArray<FString> *, int>(this, "UPrimalInventoryComponent.GetCustomFolders", result, InventoryCompType); }
+// void AddCustomFolder(FString CFolder, int InventoryCompType) { NativeCall<void, FString, int>(this, "UPrimalInventoryComponent.AddCustomFolder", CFolder, InventoryCompType); }
+// void RemoveCustomFolder(AShooterPlayerController * PC, FString FolderName, int InventoryCompType) { NativeCall<void, AShooterPlayerController *, FString, int>(this, "UPrimalInventoryComponent.RemoveCustomFolder", PC, FolderName, InventoryCompType); }
+
+// void AddCustomFolder(FString CFolder, int InventoryCompType) { NativeCall<void, FString, int>(this, "UPrimalInventoryComponent.AddCustomFolder", CFolder, InventoryCompType); }
+DECLARE_HOOK(UPrimalInventoryComponent_AddCustomFolder, void, UPrimalInventoryComponent *, FString CFolder, int InventoryCompType, FServerCustomFolder *CustomFolder);
+void Hook_UPrimalInventoryComponent_AddCustomFolder(UPrimalInventoryComponent *this_, FString CFolder, int InventoryCompType, FServerCustomFolder *CustomFolder) {
+
+	// auto f = this_->GetCustomFolders(&r, InventoryCompType);
+	// Log::GetLog()->info("[*] AddCustomFolder '{}', {} {} {}", CFolder.ToString(), InventoryCompType, CustomFolder.FolderName.ToString(), CustomFolder.InventoryCompType);
+	// Log::GetLog()->info("[*] AddCustomFolder '{}', {} {} {}", CFolder.ToString(), InventoryCompType, (long long)CustomFolder, (long long)this_);
+	// Log::GetLog()->info("[*] {}", (long long)this_->getowner);
+	// 768 0x300
+
+	Log::GetLog()->info("[*] CustomFolder {}", (long long)CustomFolder);
+
+	/*
+	auto folders = this_->ServerCustomFolderField();
+	for (int i = 0, l = folders.Max(); i < l; i++) {
+		auto item = folders[i];
+		Log::GetLog()->info("[*] 1 {} {}", i, item.ToString());
+	}
+	*/
+
+	/*
+	TArray<FString> f1;
+	auto f2 = this_->GetCustomFolders(&f1, InventoryCompType);
+	for (int i = 0, l = f1.Max(); i < l; i++) {
+		auto item = f1[i];
+		Log::GetLog()->info("[*] 2 {} {}", i, item.ToString());
+	}
+	for (int i = 0, l = f2->Max(); i < l; i++) {
+		auto item = (*f2)[i];
+		Log::GetLog()->info("[*] 3 {} {}", i, item.ToString());
+	}
+	*/
+
+	// char *a = 0; *a = 0;
+
+	UPrimalInventoryComponent_AddCustomFolder_original(this_, CFolder, InventoryCompType, 0);
+	// UPrimalInventoryComponent_AddCustomFolder_original(this_, FString("test1"), InventoryCompType, 0);
+
+}
+
+
+// void ClientAddFolderToInventoryComponent_Implementation(UPrimalInventoryComponent * forInventory, FString * NewCustomFolderName, int InventoryCompType) { NativeCall<void, UPrimalInventoryComponent *, FString *, int>(this, "AShooterPlayerController.ClientAddFolderToInventoryComponent_Implementation", forInventory, NewCustomFolderName, InventoryCompType); }
+
+void __check_for_tamed_folders(APrimalDinoCharacter *dino_) {
+
+	bool gotFolder = false;
+
+	auto inv = dino_->MyInventoryComponentField();
+	auto folders = inv->ServerCustomFolderField();
+
+	for (int i = 0, l = folders.Max(); i < l; i++) {
+		auto item = folders[i];
+		Log::GetLog()->info("[*] {} {}", i, item.ToString());
+	}
+
+	if (folders.Max() >= 2) {
+		auto item1 = folders[0];
+		auto item2 = folders[1];
+		if (item1.StartsWith("tamed") && item2.StartsWith("tamed")) gotFolder = true;
+	}
+
+	if (!gotFolder) {
+
+		auto folderInv = (UPrimalInventoryComponent *)(((char *)inv) + 216);
+
+		auto s = dino_->MyCharacterStatusComponentField();
+		auto c = s->NumberOfLevelUpPointsAppliedField();
+		auto c2 = s->MaxStatusValuesField();
+		FString f1;
+
+		f1 = FString::Format("tamed hp-{} st-{} wgh-{} dmg-{}",
+			int(c()[0]),
+			int(c()[1]),
+			int(c()[7]),
+			int(c()[8])
+		);
+
+		inv->RemoteDeleteCustomFolder(&f1, 768);
+		folderInv->AddCustomFolder(f1, 768, 0);
+
+		f1 = FString::Format("tamed oxy-{} fd-{} spd-{}",
+			int(c()[3]),
+			int(c()[4]),
+			int(c()[9])
+		);
+
+		inv->RemoteDeleteCustomFolder(&f1, 768);
+		folderInv->AddCustomFolder(f1, 768, 0);
+		
+	}
+
+}
+
+// void ServerViewRemoteInventory(AShooterPlayerController * ByPC) { NativeCall<void, AShooterPlayerController *>(this, "UPrimalInventoryComponent.ServerViewRemoteInventory", ByPC); }
+DECLARE_HOOK(UPrimalInventoryComponent_ServerViewRemoteInventory, void, UPrimalInventoryComponent *, AShooterPlayerController * ByPC);
+void Hook_UPrimalInventoryComponent_ServerViewRemoteInventory(UPrimalInventoryComponent *this_, AShooterPlayerController * ByPC) {
+	
+	// check for dino tamed inventory
+	auto owner = this_->GetOwner();
+	// auto owner = this_;
+	if (owner) {
+		auto ownerClassType = __getClassType(owner);
+		Log::GetLog()->info("[*] view inventory ownerClassType {}", ownerClassType);
+		if (ownerClassType == ot_APrimalDinoCharacter) {
+			auto dino_ = static_cast<APrimalDinoCharacter *>(owner);
+			unsigned long long tid = dino_->TargetingTeamField();
+			unsigned long long pid = dino_->OwningPlayerIDField();
+			if (tid > 100 || pid != 0) {
+				// tamed dino
+
+				__check_for_tamed_folders(dino_);
+
+				// auto name = _bp(dino_);
+				// Log::GetLog()->info("[*] tamed dino {} {} {}", name.ToString(), tid, pid);
+			}
+		}
+	}
+
+	UPrimalInventoryComponent_ServerViewRemoteInventory_original(this_, ByPC);
+}
+
 // void SetupTamed(bool bWasJustTamed) { NativeCall<void, bool>(this, "APrimalDinoCharacter.SetupTamed", bWasJustTamed); }
 DECLARE_HOOK(APrimalDinoCharacter_SetupTamed, void, APrimalDinoCharacter *, bool bWasJustTamed);
 void Hook_APrimalDinoCharacter_SetupTamed(APrimalDinoCharacter *this_, bool bWasJustTamed) {
 
-	// Log::GetLog()->info("[*] APrimalDinoCharacter_SetupTamed before {}", bWasJustTamed);
+	// auto i = this_->MyInventoryComponentField();
+	// i->GetOwner();
 
+	auto name = _bp(this_);
+	unsigned long long tid = this_->TargetingTeamField();
+	unsigned long long pid = this_->OwningPlayerIDField();
+	Log::GetLog()->info("[*] SetupTamed before {} {} {} {}", bWasJustTamed, name.ToString(), tid, pid);
+
+	// check for dino tamed inventory
+	// auto owner = this_->GetOwner();
+	
 	APrimalDinoCharacter_SetupTamed_original(this_, bWasJustTamed);
 
-	// Log::GetLog()->info("[*] APrimalDinoCharacter_SetupTamed after {}", bWasJustTamed);
-	// auto s = this_->MyCharacterStatusComponentField();
-	// dump_stats(s);
+	auto owner = this_;
+	if (owner) {
+		auto ownerClassType = __getClassType(owner);
+		Log::GetLog()->info("[*] view inventory ownerClassType {}", ownerClassType);
+		if (ownerClassType == ot_APrimalDinoCharacter) {
+			auto dino_ = static_cast<APrimalDinoCharacter *>(owner);
+			unsigned long long tid = dino_->TargetingTeamField();
+			unsigned long long pid = dino_->OwningPlayerIDField();
+			if (tid > 100 || pid != 0) {
+				// tamed dino
+				auto name = _bp(dino_);
+				Log::GetLog()->info("[*] tamed dino {} {} {}", name.ToString(), tid, pid);
+
+				__check_for_tamed_folders(dino_);
+
+			}
+		}
+	}
+
+	Log::GetLog()->info("[*] SetupTamed after {} {} {} {}", bWasJustTamed, name.ToString(), tid, pid);
+	auto s = this_->MyCharacterStatusComponentField();
+	dump_stats(s);
 }
 
 //
@@ -654,7 +918,11 @@ bool M_tribe_init() {
 	//__register_hook(APrimalCharacter, OnPrimalCharacterUnsleeped);
 	//__register_hook(APrimalCharacter, SleepBodies);
 
-	// __register_hook(APrimalDinoCharacter, SetupTamed);
+	__register_hook(APrimalDinoCharacter, SetupTamed);
+	__register_hook(UPrimalInventoryComponent, ServerViewRemoteInventory);
+	__register_hook(UPrimalInventoryComponent, AddCustomFolder);
+
+
 	__register_hook(APrimalDinoCharacter, SetCharacterStatusTameable);
 	__register_hook(APrimalDinoCharacter, AdjustDamage);
 	__register_hook(APrimalDinoCharacter, GetRandomBaseLevel);
@@ -685,7 +953,11 @@ bool M_tribe_done() {
 	// __unregister_hook(APrimalCharacter, OnPrimalCharacterUnsleeped);
 	// __unregister_hook(APrimalCharacter, SleepBodies);
 
-	// __unregister_hook(APrimalDinoCharacter, SetupTamed);
+	__unregister_hook(APrimalDinoCharacter, SetupTamed);
+	__unregister_hook(UPrimalInventoryComponent, ServerViewRemoteInventory);
+	__unregister_hook(UPrimalInventoryComponent, AddCustomFolder);
+	
+	
 	__unregister_hook(APrimalDinoCharacter, SetCharacterStatusTameable);
 	__unregister_hook(APrimalDinoCharacter, AdjustDamage);
 	__unregister_hook(APrimalDinoCharacter, GetRandomBaseLevel);

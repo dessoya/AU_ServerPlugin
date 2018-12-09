@@ -66,6 +66,18 @@
     <ClCompile Include="M_tribe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="shell.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sqlite3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="format.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="posix.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EventMessage.h">
@@ -117,6 +129,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="M_tribe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sqlite3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sqlite3ext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

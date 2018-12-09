@@ -78,9 +78,10 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;EXTENDEDRCON_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>D:\zh\ARK-Server-API_2_8\version\Core\Public</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\zh\ARK-Server-API_2_8\version\Core\Public;$(SolutionDir)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <BufferSecurityCheck>false</BufferSecurityCheck>
+      <AdditionalOptions>/D SQLITE_OPEN_NOMUTEX %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -95,6 +96,7 @@
     <ClCompile Include="ConsoleHelper.cpp" />
     <ClCompile Include="EventMessage.cpp" />
     <ClCompile Include="ExtendedEventLog.cpp" />
+    <ClCompile Include="format.cc" />
     <ClCompile Include="Messages.cpp" />
     <ClCompile Include="M_config_reader.cpp" />
     <ClCompile Include="M_console_helper.cpp" />
@@ -107,6 +109,9 @@
     <ClCompile Include="M_structures.cpp" />
     <ClCompile Include="M_timer.cpp" />
     <ClCompile Include="M_tribe.cpp" />
+    <ClCompile Include="posix.cc" />
+    <ClCompile Include="shell.c" />
+    <ClCompile Include="sqlite3.c" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -126,6 +131,8 @@
     <ClInclude Include="M_structures.h" />
     <ClInclude Include="M_timer.h" />
     <ClInclude Include="M_tribe.h" />
+    <ClInclude Include="sqlite3.h" />
+    <ClInclude Include="sqlite3ext.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

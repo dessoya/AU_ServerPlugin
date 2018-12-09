@@ -145,6 +145,9 @@ long long ___timestamp() {
 }
 
 void __Timer() {
+
+	// Log::GetLog()->info("__timer");
+
 	const auto now = cur_time = std::chrono::system_clock::now();
 
 	{
