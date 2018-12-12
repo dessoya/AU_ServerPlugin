@@ -17,6 +17,11 @@ Config::~Config() {
 std::string Config::getString(const char *key) {
 	if (json == 0) return "";
 	auto json_ = (nlohmann::json *)json;
+	auto f = json_->find(key);
+	if (json_->end() == f) {
+		Log::GetLog()->info("can't find key '{}'", key);
+		return "";
+	}
 	return (*json_)[key];
 }
 

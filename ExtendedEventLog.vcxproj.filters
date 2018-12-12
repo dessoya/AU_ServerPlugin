@@ -78,6 +78,9 @@
     <ClCompile Include="posix.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="M_storage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EventMessage.h">
@@ -135,6 +138,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sqlite3ext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="M_storage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

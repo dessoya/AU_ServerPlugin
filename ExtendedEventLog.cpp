@@ -5,8 +5,6 @@
 #include <map>
 #include <fstream>
 
-#include "hdr/sqlite_modern_cpp.h"
-
 #pragma comment(lib, "ArkApi.lib")
 
 #include "EventMessage.h"
@@ -17,6 +15,7 @@
 #include "M_console_helper.h"
 #include "M_event_writer.h"
 #include "M_hook_helper.h"
+#include "M_storage.h"
 
 #include "M_timer.h"
 
@@ -203,6 +202,7 @@ ModuleHeader modulesList[] = {
 
 	// helpers
 
+	{ "Storage", M_storage_init, M_storage_done },
 	{ "HarvestMarker", M_harvest_marker_init, M_harvest_marker_done },
 	{ "OnlinePlayers", M_online_players_init, M_online_players_done },
 
